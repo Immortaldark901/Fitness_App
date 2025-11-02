@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriHealth - FAQs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- FAQ Section -->
+  <main class="faq-container">
+    <h1>Frequently Asked Questions</h1>
+
+    <div class="faq-item">
+      <div class="faq-question">🏋️ How often should I work out each week?</div>
+      <div class="faq-answer">
+        Most people benefit from 3–5 days of exercise weekly. Combine cardio, strength, and rest days for balance.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">🍎 What should I eat after a workout?</div>
+      <div class="faq-answer">
+        Have a mix of protein and carbs — for example, chicken with rice or a banana with peanut butter.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">💪 Do I need supplements to gain muscle?</div>
+      <div class="faq-answer">
+        Not necessarily. A balanced diet is enough — supplements only help fill small nutritional gaps.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">😴 How important is sleep for fitness?</div>
+      <div class="faq-answer">
+        Sleep is essential for recovery and performance. Aim for 7–9 hours each night.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">🥗 Can I lose weight without dieting?</div>
+      <div class="faq-answer">
+        Yes, if you burn more calories than you eat — but pairing that with mindful eating is most effective.
+      </div>
+    </div>
+  </main>
+
+  <!-- Script for Navbar & FAQ -->
+  <script src="script.js"></script>
+  <script>
+    const questions = document.querySelectorAll(".faq-question");
+
+    questions.forEach(q => {
+      q.addEventListener("click", () => {
+        const item = q.parentElement;
+        item.classList.toggle("active");
+      });
+    });
+  </script>
+</body>
+</html>

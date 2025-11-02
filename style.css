@@ -1,0 +1,632 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+/*---------------------------------------------------- Navbar--------------------------------------------------------*/
+.navbar {
+    background: linear-gradient(to right, navy,darkblue);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+/* Logo */
+.navbar .logo {
+    height: 40px;
+    margin-right: 20px;
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+}
+
+/* Main navbar buttons */
+.dropbtn {
+    background: none;
+    text-decoration: none;
+    border: none;
+    color: white;
+    padding: 14px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* Hover effect with yellow */
+.dropbtn:hover {
+    background-color: #FFD700; /* yellow */
+    color: #002366;            /* royal blue text */
+    border-radius: 6px;
+}
+
+/* Dropdown content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 1;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Dropdown links */
+.dropdown-content a {
+    color: #002366; /* royal blue text */
+    padding: 10px 14px;
+    text-decoration: none;
+    display: block;
+    transition: 0.3s;
+}
+
+/* Hover inside dropdown */
+.dropdown-content a:hover {
+    background-color: #00BFFF; /* electric blue */
+    color: white;
+}
+
+/* Show dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Right aligned dropdown */
+.right {
+    margin-left: auto;
+}
+
+
+
+
+/*--------------------------------------------------Home Web page----------------------------------------------------*/
+/* ---------- General Reset ---------- */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background: #fdfdfd;
+  color: #333;
+}
+
+h1, h2, h3, h4 {
+  margin: 0 0 15px;
+  font-weight: 600;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 40px;
+  color: #002366; /* royal blue */
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(to right, DarkMagenta, #00BFFF);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: #FFD700; /* yellow hover */
+  color: #002366;
+}
+
+/* ---------- Hero Section ---------- */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 10%;
+  background: linear-gradient(135deg, #ffe4e1, #e3f9e5, #e6f0ff);
+}
+
+.hero-content {
+  flex: 1;
+  min-width: 280px;
+  padding-right: 30px;
+}
+
+.hero-content h1 {
+  font-size: 2.8rem;
+  background: linear-gradient(to right, DarkMagenta, #00BFFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-content p {
+  font-size: 1.1rem;
+  margin: 20px 0;
+  color: #444;
+}
+
+.hero-img {
+  flex: 1;
+  text-align: center;
+}
+
+.hero-img img {
+  max-width: 90%;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+/* ---------- Features Section ---------- */
+.features {
+  padding: 60px 10%;
+  background: #fff;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 30px;
+}
+
+.feature-box {
+  background: linear-gradient(to bottom right, #f5f5f5, #f0f8ff);
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.feature-box:hover {
+  transform: translateY(-6px);
+  background: linear-gradient(to bottom right, #ffe4e1, #e6f0ff);
+}
+
+.feature-box img {
+  width: 80px;
+  margin-bottom: 15px;
+}
+
+/* ---------- Motivation Quote ---------- */
+.quote {
+  padding: 50px 15%;
+  background: linear-gradient(to right, #00BFFF, DarkMagenta);
+  color: #fff;
+  text-align: center;
+  font-size: 1.4rem;
+  font-style: italic;
+  border-radius: 0 0 40px 40px;
+}
+
+.quote p {
+  margin-top: 10px;
+  font-size: 1rem;
+  font-style: normal;
+  opacity: 0.9;
+}
+
+/* ---------- Testimonials Section ---------- */
+.testimonials {
+  padding: 60px 10%;
+  background: #fef9f3;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.testimonial {
+  background: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.testimonial:hover {
+  transform: translateY(-6px);
+  background: linear-gradient(to bottom right, #f0f8ff, #fdfdfd);
+}
+
+.testimonial p {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 15px;
+}
+
+.testimonial h4 {
+  color: DarkMagenta;
+  font-weight: 600;
+}
+
+/* ---------- Newsletter Section ---------- */
+.newsletter {
+  padding: 60px 10%;
+  background: linear-gradient(to right, #f0f8ff, #ffe4e1);
+  text-align: center;
+  border-radius: 20px;
+  margin: 40px 10%;
+}
+
+.newsletter h2 {
+  color: #002366;
+}
+
+.newsletter p {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.newsletter form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.newsletter input[type="email"] {
+  padding: 12px;
+  min-width: 250px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.newsletter button {
+  border: none;
+  cursor: pointer;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background: linear-gradient(to right, DarkMagenta, #00BFFF);
+  color: #fff;
+  padding: 40px 10%;
+  text-align: center;
+}
+
+.footer-logo {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #FFD700; /* Yellow highlight */
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #fff;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #FFD700;
+}
+
+.footer p {
+  font-size: 0.9rem;
+  margin-top: 15px;
+  color: #f0f0f0;
+}
+
+/* ---------- Responsive ---------- */
+@media(max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-content {
+    padding-right: 0;
+  }
+  .newsletter {
+    margin: 30px 5%;
+    border-radius: 12px;
+  }
+}
+
+
+
+/* ---------------------------------------------------SIgn up Page----------------------------------------------------------
+-
+Page background */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right,LightSkyBlue,darkturquoise,LightCyan); /* subtle gradient */
+}
+
+/* Signup form container */
+.form-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 6px 18px rgba(0,0,0,0.2);
+  text-align: left;
+  animation: fadeIn 1s ease-in;
+}
+
+/* Form heading */
+.form-container h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #002366; /* royal blue */
+}
+
+/* Labels */
+.form-container label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+  color: #002366;
+}
+
+/* Inputs */
+.form-container input {
+  width: 100%;
+  padding: 11px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+/* Input focus effect */
+.form-container input:focus {
+  border-color: #00BFFF; /* electric blue */
+  box-shadow: 0 0 8px rgba(0,191,255,0.5);
+  outline: none;
+}
+
+/* Submit button */
+.form-container button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #002366, #00BFFF); /* royal → electric */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Button hover */
+.form-container button:hover {
+  background: #FFD700; /* yellow */
+  color: #002366; /* royal blue text */
+  transform: scale(1.05);
+}
+
+/* Note under form */
+.form-container .note {
+  text-align: center;
+  margin-top: 15px;
+  color: #333;
+}
+
+.form-container .note a {
+  color: #00BFFF;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.form-container .note a:hover {
+  color: #FFD700; /* yellow on hover */
+  text-decoration: underline;
+}
+
+/*-------------------------------------------------- About Us Page --------------------------------------------------*/
+
+.about-container {
+  max-width: 950px;
+  margin: 80px auto;
+  padding: 50px 40px;
+  background: linear-gradient(135deg, #ffe4e1 10%, #e0f7fa 50%, #e6e6fa 90%);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.9s ease-in-out;
+}
+
+/* Decorative background glow */
+.about-container::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle at center, #FFD70066 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.about-container::after {
+  content: "";
+  position: absolute;
+  bottom: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle at center, #00BFFF66 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.about-container * {
+  position: relative;
+  z-index: 1;
+}
+
+.about-container h1 {
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff4081, #00bfff, #32cd32);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
+  text-shadow: 1px 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.about-container p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #222;
+  margin-bottom: 20px;
+  text-align: justify;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px 18px;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-container p:hover {
+  transform: scale(1.02);
+  box-shadow: 0 3px 10px rgba(0, 191, 255, 0.2);
+}
+
+/* Highlight quote box */
+.about-highlight {
+  background: linear-gradient(135deg, #ffecb3, #fff3e0, #ffcc80);
+  padding: 15px 20px;
+  border-left: 6px solid #FFD700;
+  border-radius: 12px;
+  margin: 25px 0;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #444;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.25);
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+.about-container a {
+  color: #0078ff;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.about-container a:hover {
+  color: #FF4081;
+  text-shadow: 0 0 8px rgba(255, 64, 129, 0.5);
+}
+
+/* Keyframe animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.2); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .about-container {
+    margin: 50px 20px;
+    padding: 30px;
+  }
+
+  .about-container h1 {
+    font-size: 2rem;
+  }
+
+  .about-container p {
+    font-size: 1rem;
+  }
+}
+
+/* -------------------- Simple FAQ Page -------------------- */
+.faq-container {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 20px;
+}
+
+.faq-container h1 {
+  text-align: center;
+  color: #002366;
+  margin-bottom: 30px;
+}
+
+.faq-item {
+  border-bottom: 1px solid #ccc;
+  padding: 15px 0;
+}
+
+.faq-question {
+  font-weight: bold;
+  color: #0044cc;
+  cursor: pointer;
+  position: relative;
+  padding-right: 25px;
+}
+
+.faq-question::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 20px;
+  color: #0044cc;
+  transition: transform 0.2s;
+}
+
+.faq-item.active .faq-question::after {
+  content: "-";
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  display: none;
+  margin-top: 8px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.faq-item.active .faq-answer {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div id="navbar-placeholder"></div>
+
+    <h1>Recipes</h1>
+
+    <!-- Search Box -->
+    <input type="text" id="searchBox" placeholder="Search recipes...">
+
+    <!-- Category Buttons -->
+    <div class="category-btns">
+        <button class="active" data-category="all">All</button>
+        <button data-category="veg">Veg</button>
+        <button data-category="nonveg">Non-Veg</button>
+        <button data-category="jain">Jain</button>
+        <button data-category="vegan">Vegan</button>
+    </div>
+
+    <!-- Recipes -->
+    <div class="recipes">
+        <div class="recipe" data-category="veg">Paneer Butter Masala</div>
+        <div class="recipe" data-category="nonveg">Chicken Curry</div>
+        <div class="recipe" data-category="jain">Jain Dal</div>
+        <div class="recipe" data-category="vegan">Vegan Salad</div>
+        <div class="recipe" data-category="veg">Mixed Vegetable Curry</div>
+        <div class="recipe" data-category="nonveg">Mutton Rogan Josh</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
