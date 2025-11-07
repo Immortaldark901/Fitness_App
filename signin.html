@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <title>Sign In - Nutri Health</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
   <div id="navbar-placeholder"></div>
@@ -11,19 +23,124 @@
   <!-- Sign In Form -->
   <div class="form-container">
     <h1>Welcome Back!</h1>
-    <form>
+    <form id="signinForm" onsubmit="loginUser(event)">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      <div id="emailError" class="error-message"></div>
 
       <label for="password">Password</label>
       <input type="password" id="password" name="password" placeholder="Enter your password" required>
+      <div id="passwordError" class="error-message"></div>
 
-      <button type="submit">Sign In</button>
+      <button type="submit" id="submitBtn">Sign In</button>
     </form>
 
-    <p class="note">Don’t have an account? <a href="signup.html">Sign Up</a></p>
+    <p class="note">Don't have an account? <a href="signup.html">Sign Up</a></p>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
+<script>
+  function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+  }
+
+  function clearError(elementId) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.style.display = 'none';
+  }
+
+  function clearAllErrors() {
+    clearError('emailError');
+    clearError('passwordError');
+  }
+
+  async function loginUser(event) {
+    event.preventDefault();
+    clearAllErrors();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Client-side validation
+    let hasError = false;
+
+    if (!validateEmail(email)) {
+      showError('emailError', 'Please provide a valid email address');
+      hasError = true;
+    }
+
+    if (password.length === 0) {
+      showError('passwordError', 'Password is required');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing In...';
+    document.getElementById('signinForm').classList.add('loading');
+
+    try {
+      // Send data to backend API
+      const response = await fetch('http://localhost:3000/api/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store user data in localStorage (without password)
+        localStorage.setItem('user', JSON.stringify({
+          id: data.user.id,
+          username: data.user.username,
+          email: data.user.email
+        }));
+
+        alert('Login successful!');
+        window.location.href = 'profile.html';
+      } else {
+        // Show error message from server
+        alert(data.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Server error. Please make sure the server is running and try again.');
+    } finally {
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+      document.getElementById('signinForm').classList.remove('loading');
+    }
+  }
+
+  // Real-time validation feedback
+  document.getElementById('email').addEventListener('blur', function() {
+    const email = this.value.trim();
+    if (email && !validateEmail(email)) {
+      showError('emailError', 'Please provide a valid email address');
+    } else {
+      clearError('emailError');
+    }
+  });
+</script>
