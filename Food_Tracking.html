@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Nutri Health</title>
+  <link rel="stylesheet" href="style.css">
+<!-- Navbar -->
+<div id="navbar-placeholder"></div>
+
+<!-- Local Chart.js file -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+  <div class="dashboard-container">
+    <h1>Welcome to Your Health Dashboard 🍱</h1>
+
+    <!-- Calorie Goal Section -->
+    <div class="calorie-section">
+      <h2>Set Daily Calorie Goal</h2>
+      <input type="number" id="calorie-goal" placeholder="Enter total calorie goal (kcal)">
+      <button onclick="setGoal()">Save Goal</button>
+    </div>
+
+    <!-- Food Selection Section -->
+    <div class="food-section">
+      <h2>Select Indian Food</h2>
+      <select id="food-select" onchange="autoFillNutrition()">
+        <option value="">-- Select Food --</option>
+      </select>
+
+      <div class="nutrition-inputs">
+        <input type="number" id="food-calories" placeholder="Calories (kcal)">
+        <input type="number" id="food-carbs" placeholder="Carbs (g)">
+        <input type="number" id="food-proteins" placeholder="Protein (g)">
+        <input type="number" id="food-fats" placeholder="Fat (g)">
+      </div>
+
+      <div class="button-row">
+        <button onclick="addFood()">Add to Today’s Intake</button>
+        <button class="reset-btn" onclick="resetData()">Reset All</button>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <h2>Summary</h2>
+      <p><b>Total Goal:</b> <span id="goal-display">0</span> kcal</p>
+      <p><b>Consumed:</b> <span id="consumed-display">0</span> kcal</p>
+      <p><b>Status:</b> <span id="remaining-display">0</span></p>
+    </div>
+
+    <!-- Nutrient Chart -->
+    <div class="chart-section">
+      <h2>Nutrient & Calorie Breakdown</h2>
+      <div class="chart-wrapper">
+        <canvas id="nutrientChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------------- Indian Food Data -----------------------------
+    const indianFoods = {
+      biryani: { calories: 400, carbs: 50, proteins: 15, fats: 18 },
+      chickenCurry: { calories: 300, carbs: 8, proteins: 25, fats: 16 },
+      dalTadka: { calories: 180, carbs: 30, proteins: 9, fats: 6 },
+      dosa: { calories: 220, carbs: 35, proteins: 5, fats: 8 },
+      idli: { calories: 120, carbs: 25, proteins: 3, fats: 1 },
+      paneerCurry: { calories: 250, carbs: 12, proteins: 14, fats: 18 },
+      poha: { calories: 180, carbs: 30, proteins: 4, fats: 6 },
+      rice: { calories: 200, carbs: 45, proteins: 4, fats: 1 },
+      roti: { calories: 120, carbs: 20, proteins: 3, fats: 2 },
+      samosa: { calories: 150, carbs: 20, proteins: 3, fats: 7 }
+    };
+
+    let goal = 0;
+    let consumed = 0;
+    let nutrients = { carbs: 0, proteins: 0, fats: 0 };
+    let chart;
+
+    // ----------------------------- Sort Dropdown Alphabetically -----------------------------
+    window.onload = () => {
+      const select = document.getElementById("food-select");
+      const sortedFoods = Object.keys(indianFoods).sort((a, b) =>
+        a.localeCompare(b)
+      );
+
+      sortedFoods.forEach(foodKey => {
+        const option = document.createElement("option");
+        const name = foodKey.charAt(0).toUpperCase() + foodKey.slice(1).replace(/([A-Z])/g, ' $1');
+        option.value = foodKey;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+    };
+
+    // ----------------------------- Functions -----------------------------
+    function setGoal() {
+      goal = parseInt(document.getElementById('calorie-goal').value) || 0;
+      document.getElementById('goal-display').textContent = goal;
+      updateSummary();
+      updateChart();
+    }
+
+    function autoFillNutrition() {
+      const selected = document.getElementById('food-select').value;
+      if (!selected) return;
+      const food = indianFoods[selected];
+      document.getElementById('food-calories').value = food.calories;
+      document.getElementById('food-carbs').value = food.carbs;
+      document.getElementById('food-proteins').value = food.proteins;
+      document.getElementById('food-fats').value = food.fats;
+    }
+
+    function addFood() {
+      const calories = parseInt(document.getElementById('food-calories').value);
+      const carbs = parseInt(document.getElementById('food-carbs').value);
+      const protein = parseInt(document.getElementById('food-proteins').value);
+      const fat = parseInt(document.getElementById('food-fats').value);
+      if (!calories) return alert("Please select a food first!");
+
+      consumed += calories;
+      nutrients.carbs += carbs;
+      nutrients.proteins += protein;
+      nutrients.fats += fat;
+
+      updateSummary();
+      updateChart();
+
+      document.getElementById('food-select').value = "";
+      document.querySelectorAll(".nutrition-inputs input").forEach(i => i.value = "");
+    }
+
+    function updateSummary() {
+      const remainingElem = document.getElementById('remaining-display');
+      document.getElementById('consumed-display').textContent = consumed;
+
+      const remaining = goal - consumed;
+      if (remaining > 0) {
+        remainingElem.textContent = `${remaining} kcal remaining`;
+        remainingElem.style.color = "#008000"; // green
+      } else if (remaining === 0) {
+        remainingElem.textContent = "Goal reached 🎯";
+        remainingElem.style.color = "#0066cc";
+      } else {
+        remainingElem.textContent = `Exceeded by ${Math.abs(remaining)} kcal ⚠️`;
+        remainingElem.style.color = "#ff0000"; // red
+      }
+    }
+
+    function updateChart() {
+      const ctx = document.getElementById('nutrientChart');
+      const remaining = Math.max(goal - consumed, 0);
+      const exceeded = consumed > goal ? consumed - goal : 0;
+
+      const dataValues = [
+        nutrients.carbs,
+        nutrients.proteins,
+        nutrients.fats,
+        remaining,
+        exceeded
+      ];
+
+      const labels = [
+        `Carbs: ${nutrients.carbs} kcal`,
+        `Proteins: ${nutrients.proteins} kcal`,
+        `Fats: ${nutrients.fats} kcal`,
+        `Remaining: ${remaining} kcal`,
+        ...(exceeded > 0 ? [`Over Limit: ${exceeded} kcal`] : [])
+      ];
+
+      const colors = ['#FFB347', '#1E90FF', '#FF4C4C', '#2E2E2E'];
+      if (exceeded > 0) colors.push('#B22222'); // dark red for over limit
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataValues,
+            backgroundColor: colors,
+            borderColor: '#121212',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#EAEAEA',
+                font: { size: 14 }
+              }
+            }
+          }
+        }
+      });
+
+      ctx.parentElement.style.backgroundColor = "#121212";
+      ctx.parentElement.style.borderRadius = "12px";
+      ctx.parentElement.style.padding = "15px";
+    }
+
+    // ----------------------------- Reset All Data -----------------------------
+    function resetData() {
+      if (!confirm("Are you sure you want to reset all entries?")) return;
+
+      goal = 0;
+      consumed = 0;
+      nutrients = { carbs: 0, proteins: 0, fats: 0 };
+
+      document.getElementById('goal-display').textContent = 0;
+      document.getElementById('consumed-display').textContent = 0;
+      document.getElementById('remaining-display').textContent = "0";
+      document.getElementById('calorie-goal').value = "";
+      document.getElementById('food-select').value = "";
+      document.querySelectorAll(".nutrition-inputs input").forEach(i => i.value = "");
+
+      if (chart) chart.destroy();
+    }
+  </script>
+  
+  <script src="script.js"></script>
+
+</body>
+</html>

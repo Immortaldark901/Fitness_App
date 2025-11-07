@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Recommendations - NutriHealth</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
+
+
+  <div class="recommend-container">
+    <h1>Personalized Food Recommendations 🥗</h1>
+    <p>Select your food category and health goal to get tailored suggestions.</p>
+
+    <!-- Selection Section -->
+    <div class="selection-section">
+      <select id="foodType">
+        <option value="">-- Select Food Type --</option>
+        <option value="nuts">Nuts</option>
+        <option value="fruits">Fruits</option>
+        <option value="vegetables">Vegetables</option>
+        <option value="grains">Grains</option>
+        <option value="dairy">Dairy</option>
+        <option value="meat">Meat</option>
+      </select>
+
+      <select id="goal">
+        <option value="">-- Select Health Goal --</option>
+        <option value="weightloss">Weight Loss</option>
+        <option value="musclegain">Muscle Gain</option>
+        <option value="immunity">Immunity Boost</option>
+        <option value="hearthealth">Heart Health</option>
+        <option value="energy">Energy & Stamina</option>
+      </select>
+
+      <button onclick="showRecommendations()">Get Recommendations</button>
+    </div>
+
+    <div id="food-list" class="food-list"></div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+  const foodDatabase = {
+  nuts: [
+    { name: "Almonds", goals: ["musclegain", "hearthealth", "weightloss"], nutrients: "Protein, Vitamin E, Healthy fats", pros: ["Improves heart health", "Aids weight management"] },
+    { name: "Walnuts", goals: ["hearthealth", "immunity"], nutrients: "Omega-3, Antioxidants, Protein", pros: ["Boosts brain and heart health", "Reduces inflammation"] },
+    { name: "Cashews", goals: ["energy", "musclegain"], nutrients: "Magnesium, Zinc, Healthy fats", pros: ["Boosts energy", "Improves recovery"] },
+    { name: "Pistachios", goals: ["hearthealth", "weightloss"], nutrients: "Fiber, Protein, Vitamin B6", pros: ["Lowers cholesterol", "Controls hunger"] },
+    { name: "Peanuts", goals: ["musclegain", "energy"], nutrients: "Protein, Niacin, Healthy fats", pros: ["Increases muscle strength", "Provides lasting energy"] },
+    { name: "Hazelnuts", goals: ["hearthealth", "immunity"], nutrients: "Vitamin E, Folate, Magnesium", pros: ["Supports healthy cholesterol", "Improves immunity"] },
+    { name: "Macadamia Nuts", goals: ["hearthealth", "energy"], nutrients: "Monounsaturated fats, Magnesium", pros: ["Improves heart function", "Good energy source"] },
+    { name: "Brazil Nuts", goals: ["immunity", "hearthealth"], nutrients: "Selenium, Zinc, Protein", pros: ["Strengthens immunity", "Good antioxidant source"] },
+    { name: "Chia Seeds", goals: ["weightloss", "hearthealth"], nutrients: "Omega-3, Fiber, Calcium", pros: ["Keeps you full", "Improves heart function"] },
+    { name: "Flax Seeds", goals: ["immunity", "hearthealth"], nutrients: "Omega-3, Lignans, Fiber", pros: ["Reduces inflammation", "Balances hormones"] },
+  ],
+
+  fruits: [
+    { name: "Apple", goals: ["weightloss", "hearthealth"], nutrients: "Fiber, Vitamin C", pros: ["Low calorie", "Supports digestion"] },
+    { name: "Banana", goals: ["energy", "musclegain"], nutrients: "Carbs, Potassium, Vitamin B6", pros: ["Instant energy", "Prevents cramps"] },
+    { name: "Orange", goals: ["immunity", "hearthealth"], nutrients: "Vitamin C, Antioxidants", pros: ["Boosts immunity", "Promotes healthy skin"] },
+    { name: "Papaya", goals: ["immunity", "weightloss"], nutrients: "Vitamin C, A, Enzymes", pros: ["Improves digestion", "Supports immune function"] },
+    { name: "Kiwi", goals: ["immunity", "hearthealth"], nutrients: "Vitamin C, Potassium, Fiber", pros: ["Strengthens immunity", "Lowers blood pressure"] },
+    { name: "Mango", goals: ["energy", "musclegain"], nutrients: "Vitamin A, C, Carbohydrates", pros: ["Increases energy", "Supports muscle recovery"] },
+    { name: "Pomegranate", goals: ["hearthealth", "immunity"], nutrients: "Antioxidants, Vitamin C", pros: ["Improves blood flow", "Boosts immunity"] },
+    { name: "Guava", goals: ["immunity", "weightloss"], nutrients: "Vitamin C, Fiber, Antioxidants", pros: ["Aids digestion", "Improves metabolism"] },
+    { name: "Watermelon", goals: ["energy", "weightloss"], nutrients: "Water, Vitamin A, C", pros: ["Hydrating", "Low calorie"] },
+    { name: "Blueberries", goals: ["immunity", "hearthealth"], nutrients: "Antioxidants, Fiber", pros: ["Boosts brain function", "Fights free radicals"] },
+  ],
+
+  vegetables: [
+    { name: "Spinach", goals: ["weightloss", "immunity", "hearthealth"], nutrients: "Iron, Vitamins A & K, Fiber", pros: ["Boosts metabolism", "Rich in antioxidants"] },
+    { name: "Broccoli", goals: ["immunity", "musclegain"], nutrients: "Fiber, Vitamin C, Calcium", pros: ["Improves bone health", "Enhances immunity"] },
+    { name: "Carrot", goals: ["hearthealth", "immunity"], nutrients: "Beta-carotene, Vitamin A", pros: ["Improves vision", "Protects against heart disease"] },
+    { name: "Beetroot", goals: ["energy", "hearthealth"], nutrients: "Iron, Nitrates, Vitamin C", pros: ["Increases stamina", "Improves blood flow"] },
+    { name: "Cucumber", goals: ["weightloss", "energy"], nutrients: "Water, Vitamin K", pros: ["Hydrating, low calorie", "Keeps you refreshed"] },
+    { name: "Tomato", goals: ["hearthealth", "immunity"], nutrients: "Lycopene, Vitamin C", pros: ["Fights free radicals", "Supports heart health"] },
+    { name: "Bitter Gourd", goals: ["weightloss", "hearthealth"], nutrients: "Vitamin C, Potassium", pros: ["Regulates blood sugar", "Detoxifies liver"] },
+    { name: "Cauliflower", goals: ["immunity", "weightloss"], nutrients: "Vitamin C, Fiber, Potassium", pros: ["Boosts digestion", "Supports immunity"] },
+    { name: "Sweet Potato", goals: ["energy", "hearthealth"], nutrients: "Vitamin A, Carbs, Fiber", pros: ["Provides lasting energy", "Supports vision health"] },
+    { name: "Ladyfinger (Okra)", goals: ["hearthealth", "weightloss"], nutrients: "Folate, Vitamin C, Fiber", pros: ["Improves blood sugar", "Good for digestion"] },
+  ],
+
+  grains: [
+    { name: "Oats", goals: ["weightloss", "hearthealth", "energy"], nutrients: "Fiber, Beta-glucan, Protein", pros: ["Lowers cholesterol", "Keeps you full"] },
+    { name: "Brown Rice", goals: ["energy", "musclegain"], nutrients: "Complex carbs, Magnesium", pros: ["Sustained energy release", "Boosts endurance"] },
+    { name: "Quinoa", goals: ["musclegain", "immunity"], nutrients: "Protein, Iron, Fiber", pros: ["Complete protein source", "Supports muscle recovery"] },
+    { name: "Barley", goals: ["hearthealth", "weightloss"], nutrients: "Fiber, Selenium, Vitamin B", pros: ["Lowers blood sugar", "Improves digestion"] },
+    { name: "Whole Wheat Roti", goals: ["energy", "hearthealth"], nutrients: "Fiber, Carbohydrates", pros: ["Gives sustained energy", "Supports healthy digestion"] },
+    { name: "Millets", goals: ["weightloss", "energy"], nutrients: "Iron, Fiber, Protein", pros: ["Gluten-free energy source", "Good for metabolism"] },
+    { name: "Corn", goals: ["energy", "immunity"], nutrients: "Carbs, Vitamin B, Magnesium", pros: ["Provides energy", "Improves vision health"] },
+    { name: "Poha", goals: ["weightloss", "energy"], nutrients: "Iron, Carbs, Fiber", pros: ["Light and filling", "Easy to digest"] },
+    { name: "Dalia", goals: ["weightloss", "energy"], nutrients: "Fiber, Iron, Carbohydrates", pros: ["Good for digestion", "Keeps you full longer"] },
+    { name: "Rajma (Kidney Beans)", goals: ["musclegain", "hearthealth"], nutrients: "Protein, Iron, Fiber", pros: ["Boosts energy", "Reduces cholesterol"] },
+  ],
+
+  dairy: [
+    { name: "Greek Yogurt", goals: ["weightloss", "immunity", "musclegain"], nutrients: "Protein, Probiotics, Calcium", pros: ["Aids digestion", "Supports recovery"] },
+    { name: "Paneer", goals: ["musclegain", "energy"], nutrients: "Protein, Calcium, Healthy fats", pros: ["Promotes muscle gain", "Provides slow protein release"] },
+    { name: "Milk", goals: ["hearthealth", "energy"], nutrients: "Calcium, Protein, Vitamin B12", pros: ["Strengthens bones", "Boosts stamina"] },
+    { name: "Low-fat Cheese", goals: ["musclegain", "energy"], nutrients: "Protein, Calcium", pros: ["Good for bones", "Supports muscle growth"] },
+    { name: "Buttermilk", goals: ["weightloss", "immunity"], nutrients: "Probiotics, Calcium", pros: ["Improves digestion", "Hydrating"] },
+    { name: "Cottage Cheese", goals: ["musclegain", "energy"], nutrients: "Protein, Casein", pros: ["Good for recovery", "Supports muscle building"] },
+    { name: "Curd", goals: ["immunity", "weightloss"], nutrients: "Calcium, Probiotics", pros: ["Aids gut health", "Good for digestion"] },
+    { name: "Skimmed Milk", goals: ["weightloss", "hearthealth"], nutrients: "Low fat, Calcium, Protein", pros: ["Heart-friendly protein source", "Good calcium content"] },
+    { name: "Lassi (Salted)", goals: ["immunity", "energy"], nutrients: "Probiotics, Vitamin B2", pros: ["Refreshing", "Improves digestion"] },
+    { name: "Whey Protein", goals: ["musclegain", "energy"], nutrients: "Protein, Amino acids", pros: ["Fast muscle recovery", "Increases strength"] },
+  ],
+
+  meat: [
+    { name: "Chicken Breast", goals: ["musclegain", "energy"], nutrients: "High protein, Low fat", pros: ["Supports muscle repair", "Promotes lean muscle"] },
+    { name: "Eggs", goals: ["musclegain", "energy"], nutrients: "Protein, Vitamin D, Omega-3", pros: ["Helps muscle synthesis", "Boosts energy"] },
+    { name: "Fish (Salmon)", goals: ["hearthealth", "immunity"], nutrients: "Omega-3, Protein, Vitamin D", pros: ["Improves brain function", "Supports heart health"] },
+    { name: "Turkey", goals: ["musclegain", "weightloss"], nutrients: "Protein, Iron, Zinc", pros: ["Low fat, high protein", "Aids fat loss"] },
+    { name: "Mutton (Lean)", goals: ["musclegain", "energy"], nutrients: "Protein, Iron, Vitamin B12", pros: ["Boosts stamina", "Good for muscle recovery"] },
+    { name: "Tuna", goals: ["hearthealth", "musclegain"], nutrients: "Omega-3, Protein", pros: ["Supports muscle building", "Lowers cholesterol"] },
+    { name: "Shrimp", goals: ["musclegain", "immunity"], nutrients: "Protein, Zinc, Iron", pros: ["High protein, low calorie", "Good for recovery"] },
+    { name: "Duck Meat", goals: ["energy", "musclegain"], nutrients: "Protein, Iron, Fat", pros: ["Boosts iron levels", "Provides energy"] },
+    { name: "Crab", goals: ["immunity", "musclegain"], nutrients: "Zinc, Protein, Omega-3", pros: ["Improves immunity", "Supports muscle function"] },
+    { name: "Goat Liver", goals: ["immunity", "energy"], nutrients: "Iron, Vitamin A, B12", pros: ["Rich in nutrients", "Improves hemoglobin levels"] },
+  ]
+};
+
+    function showRecommendations() {
+      const type = document.getElementById("foodType").value;
+      const goal = document.getElementById("goal").value;
+      const container = document.getElementById("food-list");
+
+      if (!type || !goal) {
+        container.innerHTML = "<p style='color:red; font-size:20px;'> Please select both food type and goal.</p>";
+        return;
+      }
+
+      const foods = foodDatabase[type].filter(f => f.goals.includes(goal));
+      if (foods.length === 0) {
+        container.innerHTML = "<p style='color:#002366; font-size:20px;'>No foods found for this combination.</p>";
+        return;
+      }
+
+      let output = '<div class="food-cards">';
+      foods.forEach(food => {
+        output += `
+          <div class="food-card">
+            <h3>${food.name}</h3>
+            <p><strong>Nutrients:</strong> ${food.nutrients}</p>
+            <ul>${food.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+        `;
+      });
+      output += '</div>';
+
+      container.innerHTML = output;
+    }
+  </script>
+  
+  
+</body>
+</html>
