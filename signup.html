@@ -4,6 +4,30 @@
   <meta charset="UTF-8">
   <title>Sign Up - Nutri Health</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
+    .password-requirements {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 5px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    .password-requirements ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
     <div id="navbar-placeholder"></div>
@@ -14,17 +38,31 @@
   <form id="signupForm" onsubmit="saveUser(event)">
     <label for="username">Username</label>
     <input type="text" id="username" name="username" placeholder="Enter your username" required>
+    <div id="usernameError" class="error-message"></div>
 
     <label for="email">Email</label>
     <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    <div id="emailError" class="error-message"></div>
 
     <label for="password">Password</label>
     <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    <div class="password-requirements">
+      <strong>Password must contain:</strong>
+      <ul>
+        <li>At least 8 characters</li>
+        <li>One uppercase letter (A-Z)</li>
+        <li>One lowercase letter (a-z)</li>
+        <li>One number (0-9)</li>
+        <li>One special character (@$!%*?&)</li>
+      </ul>
+    </div>
+    <div id="passwordError" class="error-message"></div>
 
     <label for="confirm">Confirm Password</label>
     <input type="password" id="confirm" name="confirm" placeholder="Re-enter your password" required>
+    <div id="confirmError" class="error-message"></div>
 
-    <button type="submit">Sign Up</button>
+    <button type="submit" id="submitBtn">Sign Up</button>
   </form>
 
     <p class="note">Already have an account? <a href="signin.html">Sign In</a></p>
@@ -34,24 +72,149 @@
 </html>
 
 <script>
-  function saveUser(event) {
+  // Client-side validation functions
+  function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  function validatePassword(password) {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  }
+
+  function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+  }
+
+  function clearError(elementId) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.style.display = 'none';
+  }
+
+  function clearAllErrors() {
+    clearError('usernameError');
+    clearError('emailError');
+    clearError('passwordError');
+    clearError('confirmError');
+  }
+
+  async function saveUser(event) {
     event.preventDefault();
+    clearAllErrors();
 
     const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
     const confirm = document.getElementById('confirm').value.trim();
+    const submitBtn = document.getElementById('submitBtn');
 
+    // Client-side validation
+    let hasError = false;
+
+    // Username validation
+    if (username.length < 3 || username.length > 30) {
+      showError('usernameError', 'Username must be between 3 and 30 characters');
+      hasError = true;
+    }
+
+    // Email validation
+    if (!validateEmail(email)) {
+      showError('emailError', 'Please provide a valid email address');
+      hasError = true;
+    }
+
+    // Password validation
+    if (!validatePassword(password)) {
+      showError('passwordError', 'Password does not meet requirements');
+      hasError = true;
+    }
+
+    // Confirm password validation
     if (password !== confirm) {
-      alert("Passwords do not match!");
+      showError('confirmError', 'Passwords do not match');
+      hasError = true;
+    }
+
+    if (hasError) {
       return;
     }
 
-    // Store data in localStorage
-    const userData = { username, email, password };
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating Account...';
+    document.getElementById('signupForm').classList.add('loading');
 
-    alert("Account created successfully!");
-    window.location.href = "profile.html";
+    try {
+      // Send data to backend API
+      const response = await fetch('http://localhost:3000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          confirm
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store user data in localStorage (without password)
+        localStorage.setItem('user', JSON.stringify({
+          id: data.user.id,
+          username: data.user.username,
+          email: data.user.email
+        }));
+
+        alert('Account created successfully!');
+        window.location.href = 'profile.html';
+      } else {
+        // Show error message from server
+        alert(data.message || 'Failed to create account. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Server error. Please make sure the server is running and try again.');
+    } finally {
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign Up';
+      document.getElementById('signupForm').classList.remove('loading');
+    }
   }
+
+  // Real-time validation feedback
+  document.getElementById('email').addEventListener('blur', function() {
+    const email = this.value.trim();
+    if (email && !validateEmail(email)) {
+      showError('emailError', 'Please provide a valid email address');
+    } else {
+      clearError('emailError');
+    }
+  });
+
+  document.getElementById('password').addEventListener('blur', function() {
+    const password = this.value.trim();
+    if (password && !validatePassword(password)) {
+      showError('passwordError', 'Password does not meet requirements');
+    } else {
+      clearError('passwordError');
+    }
+  });
+
+  document.getElementById('confirm').addEventListener('blur', function() {
+    const password = document.getElementById('password').value.trim();
+    const confirm = this.value.trim();
+    if (confirm && password !== confirm) {
+      showError('confirmError', 'Passwords do not match');
+    } else {
+      clearError('confirmError');
+    }
+  });
 </script>
