@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>BMI Calculator - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 </head>
 <body>
@@ -45,7 +46,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
   <script>
     function calculateBMI() {
       const height = parseFloat(document.getElementById("height").value);

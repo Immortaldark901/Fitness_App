@@ -4,61 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <link rel="stylesheet" href="style.css">
 <body>
     
     <div class="navbar">
-    <!-- Logo -->
-    <a href="home.html" class="brand">
-    <img src="/images/logo.png" alt="NutriHealth Logo" class="logo">
-    </a>
+        <a href="home.html" class="brand">
+            <img src="/images/logo.png" alt="NutriHealth Logo" class="logo">
+        </a>
 
-    <!-- Home -->
-    <a href="home.html" class="dropbtn">Home</a>
+        <a href="home.html" class="dropbtn">Home</a>
 
-    <!-- Nutrition -->
-    <div class="dropdown">
-    <button class="dropbtn">Nutrition 🍲</button>
-    <div class="dropdown-content">
-        <a href="Food_Tracking.html">Food Tracking</a>
-        <a href="Food_Comparison.html">Food Comparison</a>
-        <a href="recommendations.html">Food Recommendations</a>
+        <div class="dropdown" id="nav-nutrition" style="display: none;">
+            <button class="dropbtn">Nutrition 🍲</button>
+            <div class="dropdown-content">
+                <a href="Food_Tracking.html">Food Tracking</a>
+                <a href="Food_Comparison.html">Food Comparison</a>
+                <a href="recommendations.html">Food Recommendations</a>
+            </div>
         </div>
+
+        <div class="dropdown" id="nav-fitness" style="display: none;">
+            <button class="dropbtn">Fitness</button>
+            <div class="dropdown-content">
+                <a href="Workout_Generator.html">Workout Generator</a>
+                <a href="BMI.html">BMI Calculator</a>
+                <a href="Progress_Tracking.html">Progress Tracking</a>
+                <a href="Exercise Library.html">Exercise Library</a>
+            </div>
+        </div>
+
+        <a href="recipes.html" class="dropbtn" id="nav-recipes" style="display: none;">Recipes 👨‍🍳</a>
+
+        <div class="dropdown" id="nav-profile-links" style="display: none;">
+            <button class="dropbtn">Profile</button>
+            <div class="dropdown-content">
+                <a href="profile.html">My Profile</a>
+                <a href="Dashboard.html">Dashboard</a>
+            </div>
+        </div>
+
+        <div class="dropdown right" id="nav-account-links">
+            </div>
     </div>
-
-    <!-- Tracking -->
-    <div class="dropdown">
-    <button class="dropbtn">Fitness</button>
-    <div class="dropdown-content">
-        <a href="Workout_Planner.html">Workout Planner</a>
-        <a href="Progress_Tracking.html">Progress Tracking</a>
-        <a href="Exercise Library.html">Exercise Library</a>
-        <a href="BMI.html">BMI Counter</a>
-        </div>
-    </div>
-
-        <!-- Recipes -->
-        <a href="recipes.html" class="dropbtn">Recipes 👨‍🍳</a>
-
-        <!-- Profile -->
-        <div class="dropdown">
-        <button class="dropbtn">Profile</button>
-        <div class="dropdown-content">
-            <a href="info.html">My Information</a>
-            <a href="settings.html">Settings</a>
-        </div>
-        </div>
-
-        <!-- Account -->
-        <div class="dropdown right">
-        <button class="dropbtn">Account</button>
-        <div class="dropdown-content">
-            <a href="signin.html">Sign In</a>
-            <a href="signup.html">Sign Up</a>
-        </div>
-        </div>
-    </div>
-
-    </body>
-    </html>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Sign Up - Nutri Health</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     .error-message {
       color: #e74c3c;
@@ -31,7 +32,6 @@
 </head>
 <body>
     <div id="navbar-placeholder"></div>
-  <!-- Signup Form -->
   <div class="form-container">
     <h1>Create Account</h1>
 
@@ -67,40 +67,43 @@
 
     <p class="note">Already have an account? <a href="signin.html">Sign In</a></p>
   </div>
-      <script src="script.js"></script>
+  
+  <script type="module" src="script.js"></script>
 </body>
 </html>
 
-<script>
-  // Client-side validation functions
+<script type="module">
+  // Import the new Supabase client
+  import { supabase } from './supabaseClient.js';
+
+  // --- Your existing validation functions (Keep them) ---
   function validateEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   }
-
   function validatePassword(password) {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   }
-
   function showError(elementId, message) {
     const errorElement = document.getElementById(elementId);
     errorElement.textContent = message;
     errorElement.style.display = 'block';
   }
-
   function clearError(elementId) {
     const errorElement = document.getElementById(elementId);
     errorElement.style.display = 'none';
   }
-
   function clearAllErrors() {
     clearError('usernameError');
     clearError('emailError');
     clearError('passwordError');
     clearError('confirmError');
   }
+  // --- End of validation functions ---
 
+
+  // Overwrite the saveUser function
   async function saveUser(event) {
     event.preventDefault();
     clearAllErrors();
@@ -111,76 +114,62 @@
     const confirm = document.getElementById('confirm').value.trim();
     const submitBtn = document.getElementById('submitBtn');
 
-    // Client-side validation
+    // Client-side validation (Keep this)
     let hasError = false;
-
-    // Username validation
     if (username.length < 3 || username.length > 30) {
       showError('usernameError', 'Username must be between 3 and 30 characters');
       hasError = true;
     }
-
-    // Email validation
     if (!validateEmail(email)) {
       showError('emailError', 'Please provide a valid email address');
       hasError = true;
     }
-
-    // Password validation
     if (!validatePassword(password)) {
       showError('passwordError', 'Password does not meet requirements');
       hasError = true;
     }
-
-    // Confirm password validation
     if (password !== confirm) {
       showError('confirmError', 'Passwords do not match');
       hasError = true;
     }
-
     if (hasError) {
       return;
     }
 
-    // Disable button and show loading state
+    // Disable button
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating Account...';
     document.getElementById('signupForm').classList.add('loading');
 
     try {
-      // Send data to backend API
-      const response = await fetch('http://localhost:3000/api/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          confirm
-        })
+      // **** THIS IS THE NEW CODE ****
+      // Use Supabase auth.signUp instead of fetch
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username // Store username in metadata
+          }
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Store user data in localStorage (without password)
-        localStorage.setItem('user', JSON.stringify({
-          id: data.user.id,
-          username: data.user.username,
-          email: data.user.email
-        }));
-
-        alert('Account created successfully!');
-        window.location.href = 'profile.html';
-      } else {
-        // Show error message from server
-        alert(data.message || 'Failed to create account. Please try again.');
+      if (error) {
+        throw error;
       }
+
+      if (data.user) {
+        alert('Account created! Please check your email to verify your account.');
+        // Redirect to the Dashboard to login
+        window.location.href = 'Dashboard.html';
+      } else {
+        alert('Failed to create account. Please try again.');
+      }
+      // **** END OF NEW CODE ****
+
     } catch (error) {
-      console.error('Error:', error);
-      alert('Server error. Please make sure the server is running and try again.');
+      console.error('Signup Error:', error.message);
+      alert('Error: ' + error.message);
     } finally {
       // Re-enable button
       submitBtn.disabled = false;
@@ -189,7 +178,10 @@
     }
   }
 
-  // Real-time validation feedback
+  // Make saveUser globally accessible
+  window.saveUser = saveUser;
+
+  // Real-time validation feedback (Keep this)
   document.getElementById('email').addEventListener('blur', function() {
     const email = this.value.trim();
     if (email && !validateEmail(email)) {
@@ -198,7 +190,6 @@
       clearError('emailError');
     }
   });
-
   document.getElementById('password').addEventListener('blur', function() {
     const password = this.value.trim();
     if (password && !validatePassword(password)) {
@@ -207,7 +198,6 @@
       clearError('passwordError');
     }
   });
-
   document.getElementById('confirm').addEventListener('blur', function() {
     const password = document.getElementById('password').value.trim();
     const confirm = this.value.trim();

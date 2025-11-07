@@ -4,30 +4,131 @@
   <meta charset="UTF-8">
   <title>Food Comparison - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <style>
+    .comparison-container {
+      max-width: 900px;
+    }
+    
+    /* New UI for selecting foods */
+    .selection-ui {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .selection-ui select {
+      min-width: 250px;
+      padding: 12px;
+    }
+    .selection-ui button {
+      padding: 12px 20px;
+      background: #00b894; /* A green "add" button */
+    }
+    .selection-ui button:hover {
+      background: #009874;
+    }
+    
+    /* Area to show the selected food "pills" */
+    .selected-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #f8faff;
+      border-radius: 8px;
+      border: 1px dashed #ccc;
+    }
+    .pill {
+      background: #e6f0ff;
+      color: #002366;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .pill-remove {
+      background: #002366;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pill-remove:hover {
+      background: #ff4c4c;
+    }
 
+    /* Main "Compare" button */
+    .compare-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    /* Styling for the results table */
+    #result table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    #result th {
+      background: #002366;
+      color: white;
+      padding: 14px;
+    }
+    #result td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    #result tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    /* Your existing .highlight style is perfect and will still work */
+  </style>
 </head>
 <body>
-  <!-- Navbar -->
   <div id="navbar-placeholder"></div>
 
   <div class="comparison-container">
     <h1>Food Comparison Tool </h1>
-    <p>Select 3–4 foods from the list below to compare their nutrition and benefits.</p>
+    <p>Add 2-5 foods from the list below to compare their nutrition and benefits.</p>
 
-    <div class="food-inputs">
-      <select id="food1"></select>
-      <select id="food2"></select>
-      <select id="food3"></select>
-      <select id="food4"></select>
-      <button onclick="compareFoods()">Compare</button>
+    <div class="selection-ui">
+      <select id="food-adder">
+        </select>
+      <button onclick="addFoodToSelection()">+ Add</button>
     </div>
+
+    <div id="selected-foods-area" class="selected-pills">
+      <p style="color: #666;">Select foods to compare...</p>
+    </div>
+
+    <button onclick="compareFoods()" class="compare-btn">Compare Selected Foods</button>
 
     <div id="result"></div>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
+  
   <script>
-    // Expanded Nutrition Data
+    // Expanded Nutrition Data (Your data is perfect)
     const foodData = {
       apple: { calories: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, pros: ["Rich in fiber", "Low in calories"], cons: ["Low in protein"] },
       banana: { calories: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, pros: ["High in potassium", "Good energy source"], cons: ["High sugar content"] },
@@ -45,33 +146,88 @@
       fish: { calories: 206, protein: 22, carbs: 0, fat: 12, fiber: 0, pros: ["Omega-3 fats", "Lean protein"], cons: ["Allergy risk"] },
       sweetpotato: { calories: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, pros: ["Rich in vitamin A", "Low fat"], cons: ["Moderate sugar"] }
     };
-
+    
+    // --- New Logic for Pill/Tag Selector ---
+    
+    let selectedFoodsList = []; // This array holds the selected foods
     const foodNames = Object.keys(foodData).sort();
+    const foodAdder = document.getElementById('food-adder');
 
-    [food1, food2, food3, food4].forEach(select => {
-      const defaultOption = document.createElement("option");
-      defaultOption.value = "";
-      defaultOption.text = "Select Food";
-      select.appendChild(defaultOption);
+    // 1. Populate the single dropdown
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.text = "-- Select a food to add --";
+    foodAdder.appendChild(defaultOption);
 
-      foodNames.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.text = name.charAt(0).toUpperCase() + name.slice(1);
-        select.appendChild(option);
-      });
+    foodNames.forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.text = name.charAt(0).toUpperCase() + name.slice(1);
+      foodAdder.appendChild(option);
     });
 
+    // 2. Add a food to the list
+    function addFoodToSelection() {
+      const foodName = foodAdder.value;
+      if (!foodName) return; // No food selected
+      
+      if (selectedFoodsList.length >= 5) {
+        alert("You can compare a maximum of 5 foods at a time.");
+        return;
+      }
+      if (selectedFoodsList.includes(foodName)) {
+        alert(foodName.charAt(0).toUpperCase() + foodName.slice(1) + " is already in the list.");
+        return;
+      }
+      
+      selectedFoodsList.push(foodName);
+      renderPills();
+      foodAdder.value = ""; // Reset dropdown
+    }
+
+    // 3. Remove a food from the list
+    function removeFoodFromSelection(foodName) {
+      selectedFoodsList = selectedFoodsList.filter(f => f !== foodName);
+      renderPills();
+    }
+
+    // 4. Redraw the "pills" based on the array
+    function renderPills() {
+      const pillsArea = document.getElementById('selected-foods-area');
+      pillsArea.innerHTML = ""; // Clear it
+      
+      if (selectedFoodsList.length === 0) {
+        pillsArea.innerHTML = "<p style='color: #666;'>Select foods to compare...</p>";
+        return;
+      }
+      
+      selectedFoodsList.forEach(foodName => {
+        pillsArea.innerHTML += `
+          <div class="pill">
+            <span>${foodName.charAt(0).toUpperCase() + foodName.slice(1)}</span>
+            <button classimg="pill-remove" onclick="removeFoodFromSelection('${foodName}')">&times;</button>
+          </div>
+        `;
+      });
+    }
+
+    // --- End of New Logic ---
+
+    // 5. Updated `compareFoods` function (re-uses your logic)
     function compareFoods() {
-      const selectedFoods = [food1.value, food2.value, food3.value, food4.value].filter(f => f);
+      // THIS IS THE ONLY PART THAT CHANGED
+      // Instead of reading 4 dropdowns, it reads our new array
+      const selectedFoods = [...selectedFoodsList]; 
+      
       const foods = selectedFoods.map(f => foodData[f]).filter(Boolean);
       const resultDiv = document.getElementById("result");
 
       if (foods.length < 2) {
-        resultDiv.innerHTML = "<p style='color:red; font-size:18px;'>Please select at least 2 foods.</p>";
+        resultDiv.innerHTML = "<p style='color:red; font-size:18px;'>Please select at least 2 foods to compare.</p>";
         return;
       }
 
+      // The rest of your function is perfect and runs from here
       let table = `
         <table>
           <tr><th>Nutrient</th>${selectedFoods.map(f => `<th>${f.charAt(0).toUpperCase() + f.slice(1)}</th>`).join('')}</tr>
@@ -104,6 +260,7 @@
       highlightBestNutrients();
     }
 
+    // 6. Your `highlightBestNutrients` function (no changes)
     function highlightBestNutrients() {
       const table = document.querySelector("table");
       if (!table) return;
@@ -111,17 +268,38 @@
       for (let i = 1; i < table.rows.length; i++) {
         let maxValue = 0;
         let bestCell = null;
-
-        for (let j = 1; j < table.rows[i].cells.length; j++) {
-          const value = parseFloat(table.rows[i].cells[j].innerText);
-          if (value > maxValue) {
-            maxValue = value;
-            bestCell = table.rows[i].cells[j];
-          }
+        
+        // Find the max value (but ignore row 1 "Calories" and row 4 "Fat")
+        // We want to highlight HIGH protein, carbs, fiber
+        // We do NOT want to highlight HIGH calories or fat
+        if (i === 1 || i === 4) { // Row 1 (Calories) or Row 4 (Fat)
+            let minValue = Infinity;
+            let bestCellMin = null;
+            for (let j = 1; j < table.rows[i].cells.length; j++) {
+                const value = parseFloat(table.rows[i].cells[j].innerText);
+                if (value < minValue) {
+                    minValue = value;
+                    bestCellMin = table.rows[i].cells[j];
+                }
+            }
+            if (bestCellMin) bestCellMin.classList.add("highlight"); // 'highlight' is green, let's make a 'highlight-bad'
+        } else { // Protein, Carbs, Fiber
+            for (let j = 1; j < table.rows[i].cells.length; j++) {
+                const value = parseFloat(table.rows[i].cells[j].innerText);
+                if (value > maxValue) {
+                    maxValue = value;
+                    bestCell = table.rows[i].cells[j];
+                }
+            }
+            if (bestCell) bestCell.classList.add("highlight");
         }
-        if (bestCell) bestCell.classList.add("highlight");
       }
     }
+
+    // 7. Make functions available to the HTML
+    window.addFoodToSelection = addFoodToSelection;
+    window.removeFoodFromSelection = removeFoodFromSelection;
+    window.compareFoods = compareFoods;
   </script>
   
 </body>

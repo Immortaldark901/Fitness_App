@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Dashboard - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
+  
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -51,24 +52,44 @@
       }
 
       // Fetch user profile from Supabase
+      // NOTE: This 'profiles' table doesn't exist yet. We'll need to create it.
+      // For now, let's just use the user's email or metadata.
+      
+      let name = "User";
+      if (user.user_metadata?.username) {
+        name = user.user_metadata.username;
+      } else {
+        // Fallback if username isn't in metadata (e.g., from older signups)
+        name = user.email.split('@')[0];
+      }
+      
+      /*
+      // Your original code was trying to fetch from a 'profiles' table
       const { data: profile, error } = await supabase
-        .from("profiles")
+        .from("profiles") // This table needs to be created in Supabase
         .select("username, first_name")
         .eq("id", user.id)
         .single();
-
+      
       let name = "User";
       if (profile?.username) name = profile.username;
       else if (user.user_metadata?.username) name = user.user_metadata.username;
       else if (profile?.first_name) name = profile.first_name;
+      */
 
       welcomeMessage.textContent = `Hello, ${name}! 👋`;
     });
 
+    // This function handles the "Log Out" button on this specific page
     async function logoutUser() {
       await supabase.auth.signOut();
       window.location.href = "signin.html";
     }
+    // Make it available to the onclick attribute
+    window.logoutUser = logoutUser;
   </script>
+  
+  <script type="module" src="script.js"></script>
+  
 </body>
 </html>

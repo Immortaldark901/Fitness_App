@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Sign In - Nutri Health</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     .error-message {
       color: #e74c3c;
@@ -20,7 +21,6 @@
 <body>
   <div id="navbar-placeholder"></div>
 
-  <!-- Sign In Form -->
   <div class="form-container">
     <h1>Welcome Back!</h1>
     <form id="signinForm" onsubmit="loginUser(event)">
@@ -38,32 +38,35 @@
     <p class="note">Don't have an account? <a href="signup.html">Sign Up</a></p>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
 
-<script>
+<script type="module">
+  // Import the new Supabase client
+  import { supabase } from './supabaseClient.js';
+
+  // --- Your existing validation functions (Keep them) ---
   function validateEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   }
-
   function showError(elementId, message) {
     const errorElement = document.getElementById(elementId);
     errorElement.textContent = message;
     errorElement.style.display = 'block';
   }
-
   function clearError(elementId) {
     const errorElement = document.getElementById(elementId);
     errorElement.style.display = 'none';
   }
-
   function clearAllErrors() {
     clearError('emailError');
     clearError('passwordError');
   }
+  // --- End of validation functions ---
 
+  // Overwrite the loginUser function
   async function loginUser(event) {
     event.preventDefault();
     clearAllErrors();
@@ -74,58 +77,49 @@
 
     // Client-side validation
     let hasError = false;
-
     if (!validateEmail(email)) {
       showError('emailError', 'Please provide a valid email address');
       hasError = true;
     }
-
     if (password.length === 0) {
       showError('passwordError', 'Password is required');
       hasError = true;
     }
-
     if (hasError) {
       return;
     }
 
-    // Disable button and show loading state
+    // Disable button
     submitBtn.disabled = true;
     submitBtn.textContent = 'Signing In...';
     document.getElementById('signinForm').classList.add('loading');
 
     try {
-      // Send data to backend API
-      const response = await fetch('http://localhost:3000/api/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
+      // **** THIS IS THE NEW CODE ****
+      // Use Supabase auth.signInWithPassword instead of fetch
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Store user data in localStorage (without password)
-        localStorage.setItem('user', JSON.stringify({
-          id: data.user.id,
-          username: data.user.username,
-          email: data.user.email
-        }));
-
-        alert('Login successful!');
-        window.location.href = 'profile.html';
-      } else {
-        // Show error message from server
-        alert(data.message || 'Login failed. Please check your credentials.');
+      if (error) {
+        throw error; // This will be caught by the catch block
       }
+
+      if (data.user) {
+        // SUCCESS!
+        alert('Login successful!');
+        // Redirect to the new Dashboard page
+        window.location.href = 'Dashboard.html';
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+      // **** END OF NEW CODE ****
+
     } catch (error) {
-      console.error('Error:', error);
-      alert('Server error. Please make sure the server is running and try again.');
+      console.error('Login Error:', error.message);
+      // Show the error from Supabase
+      alert('Error: ' + error.message);
     } finally {
       // Re-enable button
       submitBtn.disabled = false;
@@ -134,7 +128,10 @@
     }
   }
 
-  // Real-time validation feedback
+  // Make loginUser globally accessible to the form's onsubmit attribute
+  window.loginUser = loginUser;
+
+  // Real-time validation feedback (Keep this)
   document.getElementById('email').addEventListener('blur', function() {
     const email = this.value.trim();
     if (email && !validateEmail(email)) {
