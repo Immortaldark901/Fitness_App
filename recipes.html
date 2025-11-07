@@ -1,40 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipes</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Healthy Indian Recipes - NutriHealth</title>
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
+  <div id="navbar-placeholder"></div>
 
-    <!-- Navbar -->
-    <div id="navbar-placeholder"></div>
+  <div class="recipe-container">
+    <h1>Healthy Indian Recipes</h1>
+    <p>Filter, search, and explore detailed nutritious Indian recipes suited to your diet.</p>
 
-    <h1>Recipes</h1>
+    <div class="filter-section">
+      <select id="mealType">
+        <option value="">-- Select Meal Type --</option>
+        <option value="breakfast">Breakfast</option>
+        <option value="lunch">Lunch</option>
+        <option value="dinner">Dinner</option>
+        <option value="snacks">Snacks</option>
+      </select>
 
-    <!-- Search Box -->
-    <input type="text" id="searchBox" placeholder="Search recipes...">
+      <input type="text" id="searchBox" placeholder="Search recipes">
 
-    <!-- Category Buttons -->
-    <div class="category-btns">
+      <div class="category-btns">
         <button class="active" data-category="all">All</button>
         <button data-category="veg">Veg</button>
         <button data-category="nonveg">Non-Veg</button>
         <button data-category="jain">Jain</button>
         <button data-category="vegan">Vegan</button>
+      </div>
+
+      <button onclick="showRecipes()">Show Recipes</button>
     </div>
 
-    <!-- Recipes -->
-    <div class="recipes">
-        <div class="recipe" data-category="veg">Paneer Butter Masala</div>
-        <div class="recipe" data-category="nonveg">Chicken Curry</div>
-        <div class="recipe" data-category="jain">Jain Dal</div>
-        <div class="recipe" data-category="vegan">Vegan Salad</div>
-        <div class="recipe" data-category="veg">Mixed Vegetable Curry</div>
-        <div class="recipe" data-category="nonveg">Mutton Rogan Josh</div>
-    </div>
+    <div id="recipe-list" class="recipe-list"></div>
+  </div>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
+  <script>
+
+    const recipes = [
+    // BREAKFAST
+    {
+        name: "Poha",
+        meal: "breakfast",
+        category: "veg",
+        calories: 210, protein: 6, carbs: 35, fat: 4,
+        steps: [
+        "Rinse 1 cup poha under cold water and drain it. Let it rest for 5 minutes to soften.",
+        "Heat 1 teaspoon oil in a pan, add mustard seeds, curry leaves, and chopped onions.",
+        "Add green peas, turmeric, salt, and green chilies. Sauté for 2 minutes.",
+        "Mix in the soaked poha gently and cook for 2–3 minutes.",
+        "Turn off the flame, squeeze lemon juice, and garnish with coriander leaves."
+        ]
+    },
+    {
+        name: "Masala Oats",
+        meal: "breakfast",
+        category: "vegan",
+        calories: 240, protein: 8, carbs: 42, fat: 5,
+        steps: [
+        "Heat 1 teaspoon olive oil in a pan. Add chopped onion, tomato, and carrot.",
+        "Add salt, turmeric, and a pinch of garam masala. Stir for a minute.",
+        "Add ½ cup oats and 1 cup water or milk. Stir well to prevent lumps.",
+        "Simmer for 3–4 minutes until thick and creamy. Serve hot with coriander garnish."
+        ]
+    },
+    {
+        name: "Besan Chilla",
+        meal: "breakfast",
+        category: "veg",
+        calories: 190, protein: 10, carbs: 25, fat: 6,
+        steps: [
+        "Combine 1 cup besan with chopped onions, tomato, coriander, and green chili.",
+        "Add ½ cup water gradually to form a smooth, medium-thick batter.",
+        "Heat a non-stick pan and pour a ladle of batter, spreading in circular motion.",
+        "Drizzle little oil and cook both sides until golden brown. Serve with chutney."
+        ]
+    },
+    {
+        name: "Idli",
+        meal: "breakfast",
+        category: "veg",
+        calories: 160, protein: 6, carbs: 30, fat: 2,
+        steps: [
+        "Grease idli molds and pour fermented batter up to ¾ level.",
+        "Steam for 10–12 minutes in an idli steamer or pressure cooker (without whistle).",
+        "Allow to cool slightly before unmolding. Serve hot with sambar and coconut chutney."
+        ]
+    },
+    {
+        name: "Moong Dal Cheela",
+        meal: "breakfast",
+        category: "vegan",
+        calories: 200, protein: 10, carbs: 28, fat: 5,
+        steps: [
+        "Soak ½ cup moong dal for 2 hours and grind into a smooth paste.",
+        "Add salt, turmeric, coriander, and a little water to make a batter.",
+        "Spread the batter thinly on a hot non-stick pan and cook on both sides.",
+        "Serve warm with mint or tamarind chutney."
+        ]
+    },
+    {
+        name: "Upma",
+        meal: "breakfast",
+        category: "jain",
+        calories: 180, protein: 6, carbs: 32, fat: 3,
+        steps: [
+        "Roast ½ cup semolina (sooji) until lightly golden and fragrant.",
+        "In another pan, heat 1 tsp ghee, add mustard seeds and curry leaves.",
+        "Add chopped vegetables (optional) and sauté briefly.",
+        "Add 1½ cups hot water, salt, and roasted semolina slowly while stirring.",
+        "Cook until thick, then serve garnished with coriander."
+        ]
+    },
+    {
+        name: "Aloo Paratha",
+        meal: "breakfast",
+        category: "veg",
+        calories: 300, protein: 8, carbs: 45, fat: 10,
+        steps: [
+        "Prepare dough using wheat flour and water; keep aside.",
+        "Boil and mash potatoes, mix with chopped onions, coriander, and spices.",
+        "Stuff dough balls with filling, roll gently into parathas.",
+        "Cook on both sides using ghee until golden brown. Serve with curd or pickle."
+        ]
+    },
+    {
+        name: "Rava Dosa",
+        meal: "breakfast",
+        category: "veg",
+        calories: 230, protein: 7, carbs: 38, fat: 5,
+        steps: [
+        "Make a thin batter using ½ cup semolina, rice flour, and buttermilk.",
+        "Add chopped onion, green chili, and cumin seeds.",
+        "Pour a thin layer of batter over a hot pan and let it crisp up.",
+        "Flip and cook lightly. Serve hot with chutney or sambar."
+        ]
+    },
+    {
+        name: "Vegetable Sandwich",
+        meal: "breakfast",
+        category: "veg",
+        calories: 220, protein: 7, carbs: 35, fat: 6,
+        steps: [
+        "Spread green chutney and butter on bread slices.",
+        "Layer with sliced cucumber, tomato, beetroot, and onion.",
+        "Grill in a sandwich maker until crisp. Serve hot with ketchup."
+        ]
+    },
+    {
+        name: "Paneer Stuffed Toast",
+        meal: "breakfast",
+        category: "veg",
+        calories: 280, protein: 15, carbs: 25, fat: 10,
+        steps: [
+        "Mix crumbled paneer with salt, chili, coriander, and a dash of lemon juice.",
+        "Spread mixture between two bread slices.",
+        "Grill or toast until golden brown. Serve hot."
+        ]
+    },
+
+    // LUNCH
+    {
+        name: "Rajma Chawal",
+        meal: "lunch",
+        category: "veg",
+        calories: 420, protein: 14, carbs: 60, fat: 8,
+        steps: [
+        "Soak 1 cup rajma overnight and pressure cook until soft.",
+        "In a pan, heat oil, sauté onions, garlic, and tomatoes with spices.",
+        "Add cooked rajma and simmer for 10 minutes.",
+        "Serve hot with steamed basmati rice."
+        ]
+    },
+    {
+        name: "Dal Tadka",
+        meal: "lunch",
+        category: "jain",
+        calories: 300, protein: 12, carbs: 38, fat: 6,
+        steps: [
+        "Pressure cook 1 cup toor dal with turmeric and salt.",
+        "In a small pan, prepare tadka with ghee, cumin, and green chili (no garlic).",
+        "Pour the tadka into cooked dal and mix well before serving."
+        ]
+    },
+    {
+        name: "Chicken Curry",
+        meal: "lunch",
+        category: "nonveg",
+        calories: 450, protein: 35, carbs: 8, fat: 25,
+        steps: [
+        "Marinate chicken pieces with curd, chili, turmeric, and salt for 30 minutes.",
+        "In a pot, sauté onions, ginger-garlic paste, and tomatoes.",
+        "Add marinated chicken, cover, and cook for 20–25 minutes on medium flame.",
+        "Garnish with coriander and serve hot."
+        ]
+    },
+    {
+        name: "Paneer Butter Masala",
+        meal: "lunch",
+        category: "veg",
+        calories: 380, protein: 15, carbs: 20, fat: 22,
+        steps: [
+        "Cook chopped tomatoes, cashews, and onions till soft, then blend into paste.",
+        "In butter, sauté the paste, add cream, spices, and paneer cubes.",
+        "Simmer for 5 minutes and serve with naan or rice."
+        ]
+    },
+    {
+        name: "Vegetable Pulao",
+        meal: "lunch",
+        category: "veg",
+        calories: 350, protein: 9, carbs: 60, fat: 7,
+        steps: [
+        "Heat ghee, add cumin, bay leaf, and onion slices.",
+        "Add chopped vegetables, salt, and soaked rice.",
+        "Pour water (2:1 ratio) and cook until rice is done."
+        ]
+    },
+    {
+        name: "Palak Paneer",
+        meal: "lunch",
+        category: "veg",
+        calories: 320, protein: 18, carbs: 14, fat: 20,
+        steps: [
+        "Boil spinach leaves for 2 minutes, then blend to a smooth puree.",
+        "In a pan, sauté garlic, onion, and add the puree.",
+        "Add paneer cubes, cream, and spices. Simmer for 5 minutes."
+        ]
+    },
+    {
+        name: "Baingan Bharta",
+        meal: "lunch",
+        category: "vegan",
+        calories: 240, protein: 6, carbs: 28, fat: 12,
+        steps: [
+        "Roast large brinjal until skin is charred, then peel and mash.",
+        "Sauté onion, tomato, and green chili in oil, add mashed brinjal and spices.",
+        "Cook for 5–7 minutes until aroma develops."
+        ]
+    },
+    {
+        name: "Chole Masala",
+        meal: "lunch",
+        category: "veg",
+        calories: 380, protein: 12, carbs: 55, fat: 10,
+        steps: [
+        "Soak chickpeas overnight and pressure cook until soft.",
+        "In a pan, prepare onion-tomato gravy with spices.",
+        "Add chickpeas and simmer until thick. Garnish with coriander."
+        ]
+    },
+    {
+        name: "Methi Thepla",
+        meal: "lunch",
+        category: "jain",
+        calories: 200, protein: 6, carbs: 25, fat: 6,
+        steps: [
+        "Mix wheat flour with chopped methi leaves, salt, and spices.",
+        "Knead dough, roll into thin circles, and cook on tawa.",
+        "Serve with yogurt or pickle."
+        ]
+    },
+    {
+        name: "Fish Curry",
+        meal: "lunch",
+        category: "nonveg",
+        calories: 370, protein: 30, carbs: 10, fat: 18,
+        steps: [
+        "Marinate fish pieces with turmeric and salt.",
+        "Sauté onion, tomato, and coconut milk in pan with spices.",
+        "Add fish and cook for 10 minutes. Serve with rice."
+        ]
+    },
+
+    // DINNER
+    {
+        name: "Paneer Bhurji",
+        meal: "dinner",
+        category: "veg",
+        calories: 280, protein: 18, carbs: 12, fat: 16,
+        steps: [
+        "Heat oil, sauté onion, tomato, and chili.",
+        "Add crumbled paneer, salt, and garam masala.",
+        "Cook for 3–4 minutes, garnish with coriander."
+        ]
+    },
+    {
+        name: "Grilled Fish",
+        meal: "dinner",
+        category: "nonveg",
+        calories: 350, protein: 30, carbs: 8, fat: 15,
+        steps: [
+        "Marinate fish with lemon, garlic, and herbs for 20 minutes.",
+        "Grill for 3–4 minutes on each side. Serve with sautéed veggies."
+        ]
+    },
+    {
+        name: "Khichdi",
+        meal: "dinner",
+        category: "jain",
+        calories: 270, protein: 9, carbs: 45, fat: 5,
+        steps: [
+        "Mix ½ cup moong dal and ½ cup rice, rinse thoroughly.",
+        "Add turmeric, salt, and 2½ cups water.",
+        "Pressure cook for 2 whistles. Serve with ghee."
+        ]
+    },
+    {
+        name: "Vegetable Soup",
+        meal: "dinner",
+        category: "vegan",
+        calories: 120, protein: 5, carbs: 18, fat: 2,
+        steps: [
+        "Chop carrot, beans, tomato, and cabbage finely.",
+        "Sauté garlic in olive oil, add vegetables and water.",
+        "Boil 10 minutes, season with salt, pepper, and herbs."
+        ]
+    },
+    {
+        name: "Tofu Curry",
+        meal: "dinner",
+        category: "vegan",
+        calories: 260, protein: 20, carbs: 12, fat: 10,
+        steps: [
+        "Cut tofu into cubes and pan-fry lightly.",
+        "Prepare tomato-onion gravy with spices, add tofu.",
+        "Simmer 5 minutes and serve with rice."
+        ]
+    },
+    {
+        name: "Mixed Veg Curry",
+        meal: "dinner",
+        category: "veg",
+        calories: 310, protein: 10, carbs: 20, fat: 12,
+        steps: [
+        "Heat oil, sauté onion and tomato till soft.",
+        "Add cauliflower, beans, peas, and carrots.",
+        "Add spices and cook until veggies are tender."
+        ]
+    },
+    {
+        name: "Kadhi Pakora",
+        meal: "dinner",
+        category: "veg",
+        calories: 350, protein: 14, carbs: 25, fat: 18,
+        steps: [
+        "Make a batter with besan, onion, and spices.",
+        "Fry pakoras and set aside.",
+        "Whisk curd and besan, cook with water and turmeric.",
+        "Add pakoras and simmer for 10 minutes."
+        ]
+    },
+    {
+        name: "Mushroom Masala",
+        meal: "dinner",
+        category: "veg",
+        calories: 280, protein: 12, carbs: 16, fat: 14,
+        steps: [
+        "Sauté chopped onion, tomato, and garlic.",
+        "Add mushrooms, salt, and chili powder.",
+        "Cook for 7 minutes until thick."
+        ]
+    },
+    {
+        name: "Dum Aloo",
+        meal: "dinner",
+        category: "veg",
+        calories: 290, protein: 8, carbs: 25, fat: 14,
+        steps: [
+        "Boil and peel baby potatoes, prick with fork.",
+        "Fry lightly, then cook in tomato-yogurt gravy with spices.",
+        "Simmer on low for 10 minutes."
+        ]
+    },
+    {
+        name: "Dal Palak",
+        meal: "dinner",
+        category: "vegan",
+        calories: 250, protein: 10, carbs: 22, fat: 8,
+        steps: [
+        "Cook moong dal with turmeric and salt.",
+        "Add boiled spinach puree and sautéed garlic.",
+        "Simmer for 5 minutes and serve warm."
+        ]
+    },
+
+    // SNACKS
+    {
+        name: "Roasted Makhana",
+        meal: "snacks",
+        category: "vegan",
+        calories: 160, protein: 6, carbs: 20, fat: 5,
+        steps: [
+        "Heat a non-stick pan and add makhana.",
+        "Dry roast for 5–6 minutes until crispy.",
+        "Add salt, chili powder, and toss with 1 tsp ghee."
+        ]
+    },
+    {
+        name: "Vegetable Sandwich",
+        meal: "snacks",
+        category: "veg",
+        calories: 220, protein: 7, carbs: 35, fat: 6,
+        steps: [
+        "Layer cucumber, tomato, and lettuce on buttered bread.",
+        "Add chutney and grill till golden brown."
+        ]
+    },
+    {
+        name: "Egg Bhurji Roll",
+        meal: "snacks",
+        category: "nonveg",
+        calories: 310, protein: 20, carbs: 28, fat: 10,
+        steps: [
+        "Beat 2 eggs with salt, onion, and tomato.",
+        "Cook scrambled on low flame with spices.",
+        "Roll in whole wheat roti and serve."
+        ]
+    },
+    {
+        name: "Bhel Puri",
+        meal: "snacks",
+        category: "veg",
+        calories: 180, protein: 6, carbs: 35, fat: 3,
+        steps: [
+        "Mix puffed rice with chopped onion, tomato, and coriander.",
+        "Add green and tamarind chutneys, chaat masala, and lemon juice.",
+        "Toss well and serve immediately."
+        ]
+    },
+    {
+        name: "Chana Chaat",
+        meal: "snacks",
+        category: "vegan",
+        calories: 200, protein: 10, carbs: 30, fat: 4,
+        steps: [
+        "Mix boiled chickpeas with onion, tomato, and coriander.",
+        "Add salt, chili powder, and lemon juice. Toss and serve."
+        ]
+    },
+    {
+        name: "Paneer Tikka",
+        meal: "snacks",
+        category: "veg",
+        calories: 280, protein: 20, carbs: 10, fat: 12,
+        steps: [
+        "Marinate paneer cubes with curd, chili, turmeric, and lemon.",
+        "Grill on skewers until slightly charred. Serve with chutney."
+        ]
+    },
+    {
+        name: "Masala Corn",
+        meal: "snacks",
+        category: "jain",
+        calories: 150, protein: 4, carbs: 25, fat: 3,
+        steps: [
+        "Boil sweet corn kernels for 5 minutes.",
+        "Add butter, salt, chili, and lemon juice. Mix well and serve."
+        ]
+    },
+    {
+        name: "Hara Bhara Kabab",
+        meal: "snacks",
+        category: "veg",
+        calories: 230, protein: 12, carbs: 28, fat: 8,
+        steps: [
+        "Blend boiled spinach, peas, and potatoes into a coarse mix.",
+        "Add spices and form patties.",
+        "Shallow fry until golden on both sides."
+        ]
+    },
+    {
+        name: "Poha Cutlet",
+        meal: "snacks",
+        category: "veg",
+        calories: 210, protein: 7, carbs: 30, fat: 7,
+        steps: [
+        "Soak poha, mix with mashed potato, onion, and spices.",
+        "Form into cutlets and shallow fry till crisp."
+        ]
+    },
+    {
+        name: "Fruit Salad",
+        meal: "snacks",
+        category: "vegan",
+        calories: 120, protein: 3, carbs: 28, fat: 1,
+        steps: [
+        "Chop assorted fruits like apple, papaya, banana, and grapes.",
+        "Add lemon juice, honey, and a pinch of black salt.",
+        "Mix gently and serve chilled."
+        ]
+    }
+    ];
+
+    function showRecipes() {
+      const mealType = document.getElementById("mealType").value.toLowerCase();
+      const searchQuery = document.getElementById("searchBox").value.toLowerCase();
+      const activeCategory = document.querySelector(".category-btns button.active").dataset.category;
+      const container = document.getElementById("recipe-list");
+
+      let filtered = recipes.filter(r =>
+        (!mealType || r.meal === mealType) &&
+        (activeCategory === "all" || r.category === activeCategory) &&
+        (r.name.toLowerCase().includes(searchQuery))
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = "<p style='color:red; font-size:18px;'>No recipes found.</p>";
+        return;
+      }
+
+      container.innerHTML = filtered.map((r, i) => `
+        <div class="recipe-column">
+          <div class="recipe-header">
+            <h3>${r.name}</h3>
+            <p><strong>Calories:</strong> ${r.calories} kcal |
+            <strong>Protein:</strong> ${r.protein}g |
+            <strong>Carbs:</strong> ${r.carbs}g |
+            <strong>Fat:</strong> ${r.fat}g</p>
+            <button onclick="toggleSteps(${i})">View Steps</button>
+            </div>
+            <ul class="steps hidden" id="steps-${i}">
+                ${r.steps.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+            </div>
+      `).join('');
+    }
+
+    function toggleSteps(i) {
+      const steps = document.getElementById(`steps-${i}`);
+      steps.classList.toggle("hidden");
+    }
+
+    document.querySelectorAll(".category-btns button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".category-btns button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+  </script>
 </body>
 </html>

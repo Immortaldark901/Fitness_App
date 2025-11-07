@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - NutriHealth</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-pane {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      width: 300px;
+      background: #f6f7fb;
+      box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+      padding: 32px 20px 20px 20px;
+      display: none;
+      z-index: 10;
+    }
+    .profile-pane.active {
+      display: block;
+    }
+    .profile-info-label { font-weight: bold; margin-top: 16px; }
+    .profile-pane-close {
+      float: right;
+      color: #a00;
+      cursor: pointer;
+      font-size: 18px;
+      background: none;
+      border: none;
+      margin-top: -16px;
+      margin-right: -4px;
+    }
+    .open-profile-pane-btn {
+      position: fixed;
+      right: 0;
+      top: 110px;
+      z-index: 12;
+      padding: 9px 18px;
+      background: #3d5fb3;
+      color: #fff;
+      border: none;
+      border-radius: 6px 0 0 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+  <div class="profile-container">
+    <h1>My Profile</h1>
+    <div class="profile-card" id="profileInputCard">
+      <form id="profileForm" onsubmit="updateProfile(event)">
+        <label>Username</label>
+        <input type="text" id="username" disabled>
+        <label>Email</label>
+        <input type="email" id="email" disabled>
+        <label>Age</label>
+        <input type="number" id="age" placeholder="Enter your age" required>
+        <label>Gender</label>
+        <select id="gender" required>
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        <label>Height (cm)</label>
+        <input type="number" id="height" placeholder="Enter your height" required>
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" placeholder="Enter your weight" required>
+        <label>Activity Level</label>
+        <select id="activity" required>
+          <option value="">Select Activity Level</option>
+          <option>Sedentary (Little exercise)</option>
+          <option>Lightly Active</option>
+          <option>Moderately Active</option>
+          <option>Very Active</option>
+        </select>
+        <button type="submit">Save Profile</button>
+        <button type="button" class="logout-btn" onclick="logoutUser()">Log Out</button>
+      </form>
+    </div>
+    <button class="open-profile-pane-btn" id="openPaneBtn" style="display: none;">Profile &rarr;</button>
+    <div id="profilePane" class="profile-pane">
+      <button class="profile-pane-close" onclick="closePane()">&times;</button>
+      <h2>User Info</h2>
+      <div id="paneUsername"></div>
+      <div id="paneEmail"></div>
+      <hr>
+      <div><span class="profile-info-label">Age:</span> <span id="paneAge"></span></div>
+      <div><span class="profile-info-label">Gender:</span> <span id="paneGender"></span></div>
+      <div><span class="profile-info-label">Height:</span> <span id="paneHeight"></span> cm</div>
+      <div><span class="profile-info-label">Weight:</span> <span id="paneWeight"></span> kg</div>
+      <div><span class="profile-info-label">Activity:</span> <span id="paneActivity"></span></div>
+      <button style="margin-top: 25px;" class="logout-btn" onclick="logoutUser()">Log Out</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Initialization
+    window.onload = function() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      let profile = JSON.parse(localStorage.getItem('profile'));
+      if (!user) {
+        alert("Please sign up first!");
+        window.location.href = "signup.html";
+        return;
+      }
+      // Fill input fields
+      document.getElementById('username').value = user.username;
+      document.getElementById('email').value = user.email;
+      if (profile && profile.age && profile.height && profile.weight && profile.gender && profile.activity) {
+        // Hide profile form, show pane button
+        document.getElementById('profileInputCard').style.display = 'none';
+        document.getElementById('openPaneBtn').style.display = 'block';
+        setPane(user, profile);
+      } else {
+        document.getElementById('profileInputCard').style.display = 'block';
+        document.getElementById('openPaneBtn').style.display = 'none';
+        document.getElementById('profilePane').classList.remove('active');
+      }
+    };
+    // Save/update profile
+    function updateProfile(event) {
+      event.preventDefault();
+      const profileData = {
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value,
+        height: document.getElementById('height').value,
+        weight: document.getElementById('weight').value,
+        activity: document.getElementById('activity').value
+      };
+      localStorage.setItem('profile', JSON.stringify(profileData));
+      alert("Profile updated successfully!");
+      // After saving, hide form and show pane
+      document.getElementById('profileInputCard').style.display = 'none';
+      document.getElementById('openPaneBtn').style.display = 'block';
+      setPane(JSON.parse(localStorage.getItem('user')), profileData);
+    }
+    // Set info in the pane
+    function setPane(user, profile) {
+      document.getElementById('paneUsername').innerText = `Name: ${user.username}`;
+      document.getElementById('paneEmail').innerText = `Email: ${user.email}`;
+      document.getElementById('paneAge').innerText = profile.age;
+      document.getElementById('paneGender').innerText = profile.gender;
+      document.getElementById('paneHeight').innerText = profile.height;
+      document.getElementById('paneWeight').innerText = profile.weight;
+      document.getElementById('paneActivity').innerText = profile.activity;
+    }
+    // Open/close pane logic
+    document.getElementById('openPaneBtn').onclick = function () {
+      document.getElementById('profilePane').classList.add('active');
+    };
+    function closePane() {
+      document.getElementById('profilePane').classList.remove('active');
+    }
+    window.closePane = closePane;
+    // Logout and clear data
+    function logoutUser() {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('profile');
+        window.location.href = "signin.html";
+      }
+    }
+    window.logoutUser = logoutUser;
+  </script>
+</body>
+</html>

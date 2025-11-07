@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - NutriHealth</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+  <div class="dashboard-container">
+    <h1 id="welcome-message">Loading...</h1>
+    <p class="intro-text">
+      Welcome to your NutriHealth Dashboard — your central hub for nutrition and fitness progress.
+    </p>
+
+    <div class="dashboard-section">
+      <h2>Nutrition</h2>
+      <p>Track your meals and analyze your daily calorie intake.</p>
+      <a href="Food_Tracking.html" class="dashboard-link">Go to Food Tracking</a>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Exercise & Progress</h2>
+      <p>Keep an eye on your workout history and progress metrics.</p>
+      <a href="Progress_Tracking.html" class="dashboard-link">View Progress Tracker</a>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Recommended Workouts</h2>
+      <p>Generate personalized workout routines that suit your fitness level.</p>
+      <a href="Workout_Generator.html" class="dashboard-link">Open Workout Generator</a>
+    </div>
+
+    <button class="logout-btn" onclick="logoutUser()">Log Out</button>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js'; // using your pre-configured Supabase client
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const welcomeMessage = document.getElementById("welcome-message");
+      if (!user) {
+        welcomeMessage.textContent = "Redirecting...";
+        alert("Please sign in first!");
+        window.location.href = "signin.html";
+        return;
+      }
+
+      // Fetch user profile from Supabase
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("username, first_name")
+        .eq("id", user.id)
+        .single();
+
+      let name = "User";
+      if (profile?.username) name = profile.username;
+      else if (user.user_metadata?.username) name = user.user_metadata.username;
+      else if (profile?.first_name) name = profile.first_name;
+
+      welcomeMessage.textContent = `Hello, ${name}! 👋`;
+    });
+
+    async function logoutUser() {
+      await supabase.auth.signOut();
+      window.location.href = "signin.html";
+    }
+  </script>
+</body>
+</html>

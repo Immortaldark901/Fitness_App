@@ -1251,4 +1251,448 @@ button:hover {
 }
 
 
+/* Simple clean styles for Workout Generator page */
+body {
+  background: #FFF4E1;
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+  margin: 0;
+  color: #223;
+}
 
+#navbar-placeholder { margin-bottom: 18px; }
+
+/* container */
+.workout-container {
+  max-width: 1000px;
+  margin: 48px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+/* headings */
+h1 { color: #002366; font-size: 34px; margin: 0 0 6px; }
+.lead { color: #444; font-size: 16px; margin-bottom: 18px; }
+
+/* controls */
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+label { font-weight: 600; color: #002366; margin-right: 6px; }
+select {
+  padding: 12px 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e6;
+  min-width: 220px;
+}
+
+button { cursor: pointer; border-radius: 8px; padding: 10px 14px; font-weight: 700; font-size: 15px; border: none; }
+button.primary { background: #002366; color: #fff; }
+button.outline { background: #fff; border: 2px solid #002366; color: #002366; }
+button.primary:hover { background:#0046a0; }
+button.outline:hover { background:#f0f6ff; }
+
+/* workout list cards */
+.workout-list { margin-top: 10px; }
+.workout-cards { display:flex; gap:12px; flex-wrap:wrap; }
+.workout-card {
+  background: #f8faff;
+  border-radius:10px;
+  padding:12px 14px;
+  min-width: 240px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.workout-card .ex-name { font-size: 17px; font-weight:700; color:#002366; margin:0; }
+.workout-card .ex-type { font-size:12px; color:#666; display:block; margin-top:3px; }
+.add-btn { background:#00b894; color:white; border:none; border-radius:8px; padding:8px 10px; font-weight:700; }
+.add-btn:hover { background:#019874; }
+
+/* plan area */
+.plan-section { margin-top: 28px; }
+.plan-section h2 { font-size:26px; color:#002366; margin-bottom:12px; }
+
+.user-plan { min-height: 56px; }
+.plan-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+.plan-list li {
+  background:#f0f7ff;
+  border-radius:10px;
+  padding:10px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:18px;
+}
+.plan-list .meta { margin-top:6px; color:#444; font-size:14px; display:flex; gap:12px; flex-wrap:wrap; }
+.remove-small { background:#ff4c4c; color:white; border:none; border-radius:6px; padding:6px 8px; font-weight:700; cursor:pointer; }
+.remove-small:hover { background:#ff2e2e; }
+
+.plan-actions { margin-top:12px; display:flex; gap:12px; align-items:center; }
+.export-area { background:#efefef; padding:12px; border-radius:8px; margin-top:12px; max-height:240px; overflow:auto; font-size:13px; }
+
+/* flash message */
+.flash {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 30px;
+  background: #002366;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  opacity: 0; transition: all 0.25s ease;
+  z-index: 9999;
+}
+.flash.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+/* responsive */
+@media (max-width:720px) {
+  .workout-cards { justify-content:center; }
+  .workout-card { min-width: 100%; }
+  .plan-list li { width: 100%; }
+  .controls { flex-direction:column; align-items:flex-start; gap:8px; }
+}
+
+/*---------------------------------------Workout Generator------------------------------*/
+
+
+/* Simple clean styles for Workout Generator page */
+body {
+  background: #FFF4E1;
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+  margin: 0;
+  color: #223;
+}
+
+#navbar-placeholder { margin-bottom: 18px; }
+
+/* container */
+.workout-container {
+  max-width: 1000px;
+  margin: 48px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+/* headings */
+h1 { color: #002366; font-size: 34px; margin: 0 0 6px; }
+.lead { color: #444; font-size: 16px; margin-bottom: 18px; }
+
+/* controls */
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+label { font-weight: 600; color: #002366; margin-right: 6px; }
+select {
+  padding: 12px 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e6;
+  min-width: 220px;
+}
+
+button { cursor: pointer; border-radius: 8px; padding: 10px 14px; font-weight: 700; font-size: 15px; border: none; }
+button.primary { background: #002366; color: #fff; }
+button.outline { background: #fff; border: 2px solid #002366; color: #002366; }
+button.primary:hover { background:#0046a0; }
+button.outline:hover { background:#f0f6ff; }
+
+/* workout list cards */
+.workout-list { margin-top: 10px; }
+.workout-cards { display:flex; gap:12px; flex-wrap:wrap; }
+.workout-card {
+  background: #f8faff;
+  border-radius:10px;
+  padding:12px 14px;
+  min-width: 240px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.workout-card .ex-name { font-size: 17px; font-weight:700; color:#002366; margin:0; }
+.workout-card .ex-type { font-size:12px; color:#666; display:block; margin-top:3px; }
+.add-btn { background:#00b894; color:white; border:none; border-radius:8px; padding:8px 10px; font-weight:700; }
+.add-btn:hover { background:#019874; }
+
+/* plan area */
+.plan-section { margin-top: 28px; }
+.plan-section h2 { font-size:26px; color:#002366; margin-bottom:12px; }
+
+.user-plan { min-height: 56px; }
+.plan-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+.plan-list li {
+  background:#f0f7ff;
+  border-radius:10px;
+  padding:10px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:18px;
+}
+.plan-list .meta { margin-top:6px; color:#444; font-size:14px; display:flex; gap:12px; flex-wrap:wrap; }
+.remove-small { background:#ff4c4c; color:white; border:none; border-radius:6px; padding:6px 8px; font-weight:700; cursor:pointer; }
+.remove-small:hover { background:#ff2e2e; }
+
+.plan-actions { margin-top:12px; display:flex; gap:12px; align-items:center; }
+.export-area { background:#efefef; padding:12px; border-radius:8px; margin-top:12px; max-height:240px; overflow:auto; font-size:13px; }
+
+/* flash message */
+.flash {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 30px;
+  background: #002366;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  opacity: 0; transition: all 0.25s ease;
+  z-index: 9999;
+}
+.flash.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+/* responsive */
+@media (max-width:720px) {
+  .workout-cards { justify-content:center; }
+  .workout-card { min-width: 100%; }
+  .plan-list li { width: 100%; }
+  .controls { flex-direction:column; align-items:flex-start; gap:8px; }
+}
+
+
+
+
+/*-----------------------------------Dashboard MAIN-----------------------------------------*/
+
+.dashboard-container {
+  max-width: 900px;
+  margin: 80px auto;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  padding: 50px;
+  text-align: center;
+}
+
+#welcome-message {
+  color: #002366;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.intro-text {
+  color: #444;
+  font-size: 18px;
+  margin-bottom: 40px;
+}
+
+.dashboard-section {
+  background: #f8faff;
+  border-radius: 10px;
+  padding: 20px 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  text-align: left;
+}
+
+.dashboard-section h2 {
+  color: #002366;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.dashboard-section p {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.dashboard-link {
+  display: inline-block;
+  background: #002366;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.dashboard-link:hover {
+  background: #0055cc;
+}
+
+.logout-btn {
+  margin-top: 30px;
+  background: #ff4c4c;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #ff2e2e;
+}
+
+/*-------------------------------RECIPES------------------------------------*/
+
+body {
+  background-color: #FFF8E7;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.recipe-container {
+  max-width: 900px;
+  margin: 80px auto;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  padding: 50px;
+}
+
+h1 {
+  color: #002366;
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+p {
+  color: #444;
+  font-size: 17px;
+  text-align: center;
+}
+
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 30px 0;
+}
+
+select, input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 250px;
+}
+
+.category-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.category-btns button {
+  padding: 8px 14px;
+  border: 1px solid #002366;
+  border-radius: 8px;
+  background: white;
+  color: #002366;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+.category-btns button.active,
+.category-btns button:hover {
+  background: #002366;
+  color: white;
+}
+
+button {
+  padding: 10px 20px;
+  background: #002366;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #0055cc;
+}
+
+/* Recipe list vertical layout */
+.recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recipe-column {
+  text-align: left;
+  background: linear-gradient(135deg, #fff, #f8faff);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-header h3 {
+  color: #002366;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.recipe-header p {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.recipe-header button {
+  background: #00b894;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 15px;
+}
+
+.recipe-header button:hover {
+  background: #009973;
+}
+
+.steps {
+  margin-top: 10px;
+  padding-left: 25px;
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  select, input {
+    width: 90%;
+  }
+}
