@@ -2,6 +2,7 @@ const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,11 @@ const supabase = createClient(
 );
 
 console.log('Supabase client initialized successfully');
+
+// Root route - serve home page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'home.html'));
+});
 
 // Validation Helper Functions
 const validateEmail = (email) => {
