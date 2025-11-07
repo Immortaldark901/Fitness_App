@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 require('dotenv').config();
@@ -12,64 +12,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Supabase Client Initialization
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
-// User Schema with validation
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    trim: true,
-    minlength: [3, 'Username must be at least 3 characters long'],
-    maxlength: [30, 'Username cannot exceed 30 characters']
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    trim: true,
-    lowercase: true,
-    match: [
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      'Please provide a valid email address'
-    ]
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters long']
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-// Pre-save hook to hash password
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-const User = mongoose.model('User', userSchema);
+console.log('Supabase client initialized successfully');
 
 // Validation Helper Functions
 const validateEmail = (email) => {
@@ -129,7 +78,12 @@ app.post('/api/signup', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
+
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -137,20 +91,37 @@ app.post('/api/signup', async (req, res) => {
       });
     }
 
-    // Create new user
-    const newUser = new User({
-      username,
-      email,
-      password
-    });
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    await newUser.save();
+    // Create new user in Supabase
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert([
+        {
+          username: username,
+          email: email,
+          password: hashedPassword,
+          created_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to create account. Please try again.' 
+      });
+    }
 
     res.status(201).json({ 
       success: true, 
       message: 'Account created successfully',
       user: {
-        id: newUser._id,
+        id: newUser.id,
         username: newUser.username,
         email: newUser.email
       }
@@ -186,9 +157,14 @@ app.post('/api/signin', async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
+    // Find user in Supabase
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (fetchError || !user) {
       return res.status(401).json({ 
         success: false, 
         message: 'Invalid email or password' 
@@ -196,7 +172,7 @@ app.post('/api/signin', async (req, res) => {
     }
 
     // Compare passwords
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
         success: false, 
@@ -208,7 +184,7 @@ app.post('/api/signin', async (req, res) => {
       success: true, 
       message: 'Login successful',
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email
       }
