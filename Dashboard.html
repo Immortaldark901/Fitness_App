@@ -17,6 +17,14 @@
 
   <div id="dashboard-data"></div>
 
+  <!-- Food Tracking Summary Section -->
+  <div class="dashboard-section">
+    <h2>Today's Nutrition Summary 🍽️</h2>
+    <div id="food-tracking-summary">
+      <p>Loading nutrition data...</p>
+    </div>
+  </div>
+
     <div class="dashboard-section">
       <h2>Nutrition</h2>
       <p>Track your meals and analyze your daily calorie intake.</p>
@@ -45,6 +53,7 @@
     const user = JSON.parse(localStorage.getItem('user'));
     const welcomeMessage = document.getElementById("welcome-message");
     const dashboardData = document.getElementById("dashboard-data");
+    const foodSummaryDiv = document.getElementById("food-tracking-summary");
 
     if (!user) {
       alert("Please sign in first!");
@@ -53,6 +62,9 @@
     }
 
     welcomeMessage.textContent = `Hello, ${user.username}!`;
+
+    // Load food tracking data from localStorage
+    loadFoodTrackingSummary();
 
     // Fetch user workouts
     const { data: workouts, error } = await supabase
@@ -95,6 +107,77 @@
       dashboardData.innerHTML = html;
     }
   });
+
+  // Function to load and display food tracking summary
+  function loadFoodTrackingSummary() {
+    const foodSummaryDiv = document.getElementById("food-tracking-summary");
+    const dailyCalories = JSON.parse(localStorage.getItem('dailyCalories') || '{}');
+    const todayDate = new Date().toISOString().split('T')[0];
+    
+    // Get today's total calories
+    const todayCalories = dailyCalories[todayDate] || 0;
+    
+    // Get last 7 days of data
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      last7Days.push({
+        date: dateStr,
+        calories: dailyCalories[dateStr] || 0
+      });
+    }
+
+    // Calculate weekly average
+    const weeklyTotal = last7Days.reduce((sum, day) => sum + day.calories, 0);
+    const weeklyAverage = Math.round(weeklyTotal / 7);
+
+    if (todayCalories === 0 && weeklyTotal === 0) {
+      foodSummaryDiv.innerHTML = `
+        <p style="color: #666;">No food tracking data yet. Start tracking your meals!</p>
+        <a href="Food_Tracking.html" class="dashboard-link">Start Tracking</a>
+      `;
+      return;
+    }
+
+    let html = `
+      <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <h3 style="margin-top: 0;">Today's Intake</h3>
+        <p style="font-size: 24px; font-weight: bold; color: #2E7D32; margin: 10px 0;">
+          ${todayCalories} kcal
+        </p>
+        <p style="color: #666; font-size: 14px;">Weekly Average: ${weeklyAverage} kcal/day</p>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <h4>Last 7 Days</h4>
+        <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <tr>
+            <th>Date</th>
+            <th>Calories (kcal)</th>
+          </tr>
+    `;
+
+    last7Days.forEach(day => {
+      const dateObj = new Date(day.date);
+      const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const isToday = day.date === todayDate;
+      html += `
+        <tr style="${isToday ? 'background: #fffacd; font-weight: bold;' : ''}">
+          <td>${formattedDate}${isToday ? ' (Today)' : ''}</td>
+          <td>${day.calories}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </table>
+      </div>
+    `;
+
+    foodSummaryDiv.innerHTML = html;
+  }
 
   async function logoutUser() {
     localStorage.removeItem('user');
