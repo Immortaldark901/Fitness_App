@@ -46,7 +46,9 @@
       </div>
 
       <div class="plan-actions">
-        <button id="savePlan" class="primary">Save Plan</button>
+        <label for="workoutDate">Select Date:</label>
+        <input type="date" id="workoutDate" />
+        <button id="savePlan" class="primary">Save Plan for Selected Date</button>
         <button id="exportPlan" class="outline">Export Plan</button>
       </div>
 
@@ -83,6 +85,10 @@
   const exportBtn = document.getElementById('exportPlan');
   const clearSavedBtn = document.getElementById('clearSaved');
   const exportArea = document.getElementById('exportArea');
+  const workoutDateInput = document.getElementById('workoutDate');
+
+  // Set default date to today
+  workoutDateInput.valueAsDate = new Date();
 
   // render "Show Workouts" button click
   showBtn.addEventListener('click', () => {
@@ -138,7 +144,8 @@
       type,
       sets: sets.trim() || null,
       reps: reps.trim() || null,
-      duration: duration.trim() || null
+      duration: duration.trim() || null,
+      completed: false // Add completion status
     };
 
     userPlan.push(item);
@@ -194,9 +201,40 @@
     updatePlan();
   }
 
+  // Save workout plan to daily workouts
   savePlanBtn.addEventListener('click', () => {
+    if (!userPlan.length) {
+      flashMessage('Please add exercises to your plan first');
+      return;
+    }
+
+    const selectedDate = workoutDateInput.value;
+    if (!selectedDate) {
+      flashMessage('Please select a date');
+      return;
+    }
+
+    // Get existing daily workouts
+    let dailyWorkouts = JSON.parse(localStorage.getItem('dailyWorkouts') || '{}');
+    
+    // Create workout plan object
+    const workoutPlan = {
+      date: selectedDate,
+      exercises: userPlan.map(ex => ({
+        ...ex,
+        completed: false // Initialize as not completed
+      })),
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to daily workouts (overwrite if exists for this date)
+    dailyWorkouts[selectedDate] = workoutPlan;
+    localStorage.setItem('dailyWorkouts', JSON.stringify(dailyWorkouts));
+    
+    // Keep the plan in nutri_userPlan for reuse
     savePlanToStorage();
-    flashMessage('Plan saved locally');
+    
+    flashMessage(`Workout plan saved for ${selectedDate}!`);
   });
 
   clearSavedBtn.addEventListener('click', () => {
