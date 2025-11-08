@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Workout Progress - NutriHealth</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
+
+  <div class="dashboard-container">
+    <h1>Workout Progress & History 💪</h1>
+    <p>Keep an eye on your workout history and progress metrics.</p>
+
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+      <h2>Select a Date</h2>
+      <input type="date" id="datePicker">
+      <button id="loadWorkoutsBtn">View Workouts</button>
+    </div>
+
+    <!-- Workout History -->
+    <div id="workout-history" class="workout-history">
+      <h2>Workout History</h2>
+      <div id="workoutList">
+        <p class="muted">Select a date to view your workout history.</p>
+      </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="chart-section">
+      <h2>Workout Intensity Overview</h2>
+      <canvas id="progressChart"></canvas>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert("Please sign in first!");
+      window.location.href = "signin.html";
+    }
+
+    const datePicker = document.getElementById('datePicker');
+    const loadWorkoutsBtn = document.getElementById('loadWorkoutsBtn');
+    const workoutListEl = document.getElementById('workoutList');
+    const progressChartEl = document.getElementById('progressChart');
+
+    let chart;
+
+    // Default date = today
+    datePicker.valueAsDate = new Date();
+
+    // Event: Load workouts for selected date
+    loadWorkoutsBtn.addEventListener('click', async () => {
+      const selectedDate = datePicker.value;
+      if (!selectedDate) return alert('Please select a date first.');
+
+      await loadWorkoutHistory(selectedDate);
+    });
+
+    // Load workout history
+    async function loadWorkoutHistory(selectedDate) {
+      const startOfDay = new Date(selectedDate);
+      const endOfDay = new Date(selectedDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Fetch workouts for the selected day
+      const { data: workouts, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching workouts:', error);
+        alert('Failed to load workouts.');
+        return;
+      }
+
+      if (!workouts || workouts.length === 0) {
+        workoutListEl.innerHTML = `<p class="muted">No workouts found for ${selectedDate}.</p>`;
+        if (chart) chart.destroy();
+        return;
+      }
+
+      // Display workout details
+      const html = workouts.map(w => {
+        const exercises = JSON.parse(w.exercises || '[]');
+        const listItems = exercises
+          .map(ex => `
+            <li>
+              <strong>${ex.name}</strong> 
+              ${ex.sets ? `- ${ex.sets} sets` : ''} 
+              ${ex.reps ? `x ${ex.reps} reps` : ''} 
+              ${ex.duration ? `(${ex.duration})` : ''}
+            </li>`)
+          .join('');
+        return `
+          <div class="workout-card" style="margin-bottom:15px;">
+            <h3>${w.plan_name}</h3>
+            <ul>${listItems}</ul>
+            <p><small>${new Date(w.created_at).toLocaleString()}</small></p>
+          </div>`;
+      }).join('');
+
+      workoutListEl.innerHTML = html;
+
+      // Generate chart for exercise types
+      renderWorkoutChart(workouts);
+    }
+
+    // Chart: show count per workout type
+    function renderWorkoutChart(workouts) {
+      const typeCount = {};
+
+      workouts.forEach(w => {
+        const exercises = JSON.parse(w.exercises || '[]');
+        exercises.forEach(ex => {
+          const type = ex.type || 'Other';
+          typeCount[type] = (typeCount[type] || 0) + 1;
+        });
+      });
+
+      const labels = Object.keys(typeCount);
+      const data = Object.values(typeCount);
+
+      if (chart) chart.destroy();
+      chart = new Chart(progressChartEl, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Exercises per Type',
+            data,
+            backgroundColor: '#1E90FF',
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Auto-load today’s workouts on open
+    window.addEventListener('load', async () => {
+      const today = new Date().toISOString().split('T')[0];
+      await loadWorkoutHistory(today);
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

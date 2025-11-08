@@ -1,64 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navbar</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<link rel="stylesheet" href="style.css">
 <body>
-    
-    <div class="navbar">
+  <div class="navbar" id="mainNavbar">
     <!-- Logo -->
-    <a href="home.html" class="brand">
-    <img src="/images/logo.png" alt="NutriHealth Logo" class="logo">
+    <a id="home-link" href="home.html" class="brand">
+      <img src="images/logo.png" alt="NutriHealth Logo" class="logo">
     </a>
 
     <!-- Home -->
-    <a href="home.html" class="dropbtn">Home</a>
+    <a id="home-btn" href="home.html" class="dropbtn">Home</a>
 
     <!-- Nutrition -->
     <div class="dropdown">
-    <button class="dropbtn">Nutrition 🍲</button>
-    <div class="dropdown-content">
+      <button class="dropbtn">Nutrition</button>
+      <div class="dropdown-content">
         <a href="Food_Tracking.html">Food Tracking</a>
         <a href="Food_Comparison.html">Food Comparison</a>
         <a href="recommendations.html">Food Recommendations</a>
-        </div>
+      </div>
     </div>
 
-    <!-- Tracking -->
+    <!-- Fitness -->
     <div class="dropdown">
-    <button class="dropbtn">Fitness</button>
-    <div class="dropdown-content">
-        <a href="Workout_Planner.html">Workout Planner</a>
+      <button class="dropbtn">Fitness</button>
+      <div class="dropdown-content">
+        <a href="Workout_Generator.html">Workout Planner</a>
         <a href="Progress_Tracking.html">Progress Tracking</a>
-        <a href="Exercise Library.html">Exercise Library</a>
+        <a href="Exercise_Library.html">Exercise Library</a>
         <a href="BMI.html">BMI Counter</a>
-        </div>
+      </div>
     </div>
 
-        <!-- Recipes -->
-        <a href="recipes.html" class="dropbtn">Recipes 👨‍🍳</a>
+    <!-- Recipes -->
+    <a href="recipes.html" class="dropbtn">Recipes 👨‍🍳</a>
 
-        <!-- Profile -->
-        <div class="dropdown">
-        <button class="dropbtn">Profile</button>
-        <div class="dropdown-content">
-            <a href="info.html">My Information</a>
-            <a href="settings.html">Settings</a>
-        </div>
-        </div>
-
-        <!-- Account -->
-        <div class="dropdown right">
-        <button class="dropbtn">Account</button>
-        <div class="dropdown-content">
-            <a href="signin.html">Sign In</a>
-            <a href="signup.html">Sign Up</a>
-        </div>
-        </div>
+    <!-- Account Dropdown -->
+    <div class="dropdown right">
+      <button class="dropbtn" id="account-btn">Account</button>
+      <div class="dropdown-content" id="account-options">
+        <a href="signin.html">Sign In</a>
+        <a href="signup.html">Sign Up</a>
+      </div>
     </div>
-
-    </body>
-    </html>
+  </div>
+</body>
+</html>

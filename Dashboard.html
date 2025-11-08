@@ -52,69 +52,46 @@
 
     welcomeMessage.textContent = `Hello, ${user.username}!`;
 
-    // Load workouts and food data
-    const [workoutRes, foodRes] = await Promise.all([
-      supabase.from('workouts').select('*').eq('user_id', user.id),
-      supabase.from('food_tracking').select('*').eq('user_id', user.id)
-    ]);
+    // Fetch user workouts
+    const { data: workouts, error } = await supabase
+      .from('workouts')
+      .select('*')
+      .eq('user_id', user.id);
 
-    const workouts = workoutRes.data || [];
-    const foodLogs = foodRes.data || [];
+    if (error) {
+      console.error('Error fetching workouts:', error);
+      dashboardData.innerHTML = `<p>Error loading workouts. Please refresh.</p>`;
+      return;
+    }
 
-    let html = '';
-
-    // Workout Section
-    if (!workouts.length) {
-      html += `
+    if (!workouts || workouts.length === 0) {
+      dashboardData.innerHTML = `
         <div class="empty-state">
           <h3>Create your first Workout Plan 💪</h3>
-          <button class="btn-primary" onclick="window.location.href='Workout_Generator.html'">Create Workout Plan</button>
+          <button class="btn-primary" onclick="window.location.href='Workout_Generator.html'">Create</button>
         </div>`;
     } else {
-      html += `
+      let html = `
         <h3>Your Saved Workouts</h3>
         <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <tr><th>Plan Name</th><th>Exercises</th><th>Created At</th></tr>`;
+          <tr>
+            <th>Plan Name</th>
+            <th>Exercises</th>
+            <th>Created At</th>
+          </tr>`;
       workouts.forEach(w => {
-        const exercises = JSON.parse(w.exercises || '[]')
+        const exercisesList = JSON.parse(w.exercises || '[]')
           .map(ex => `<li>${ex.name}</li>`).join('');
         html += `
           <tr>
             <td>${w.plan_name}</td>
-            <td><ul>${exercises}</ul></td>
+            <td><ul>${exercisesList}</ul></td>
             <td>${new Date(w.created_at).toLocaleString()}</td>
           </tr>`;
       });
       html += `</table>`;
+      dashboardData.innerHTML = html;
     }
-
-    // Food Section
-    if (!foodLogs.length) {
-      html += `
-        <div class="empty-state">
-          <h3>Add your first Food Intake 🍱</h3>
-          <button class="btn-primary" onclick="window.location.href='Food_Tracking.html'">Track Food</button>
-        </div>`;
-    } else {
-      html += `
-        <h3>Your Food Logs</h3>
-        <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <tr><th>Date</th><th>Goal (kcal)</th><th>Consumed (kcal)</th><th>Foods</th></tr>`;
-      foodLogs.forEach(f => {
-        const foods = JSON.parse(f.foods || '[]')
-          .map(item => `<li>${item.name} (${item.calories} kcal)</li>`).join('');
-        html += `
-          <tr>
-            <td>${f.date}</td>
-            <td>${f.goal}</td>
-            <td>${f.consumed}</td>
-            <td><ul>${foods}</ul></td>
-          </tr>`;
-      });
-      html += `</table>`;
-    }
-
-    dashboardData.innerHTML = html;
   });
 
   async function logoutUser() {
@@ -122,7 +99,8 @@
     window.location.href = "signin.html";
   }
   window.logoutUser = logoutUser;
-</script>
 
+</script>
+  <script src="script.js"></script>
 </body>
 </html>
