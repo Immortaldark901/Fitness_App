@@ -8,7 +8,7 @@
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     
     // Pages that don't require authentication
-    const publicPages = ['signup.html', 'signin.html', 'home.html', 'index.html', ''];
+    const publicPages = ['signup.html', 'signin.html', 'home.html', 'index.html', 'Aboutus.html', 'faq.html', ''];
     
     // Check if current page is public
     const isPublicPage = publicPages.some(page => 
