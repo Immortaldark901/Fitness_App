@@ -7,6 +7,43 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <!-- Auth Check Script - Must be loaded first -->
   <script src="auth-check.js"></script>
+  <style>
+    .workout-checklist {
+      margin-top: 15px;
+    }
+    .workout-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f9f9f9;
+      margin-bottom: 5px;
+      border-radius: 4px;
+    }
+    .workout-item.completed {
+      background: #e8f5e9;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    .workout-item input[type="checkbox"] {
+      margin-right: 15px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .workout-details {
+      flex: 1;
+    }
+    .workout-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .workout-meta {
+      font-size: 13px;
+      color: #666;
+      margin-top: 3px;
+    }
+  </style>
 </head>
 <body>
   <div id="navbar-placeholder"></div>
@@ -16,6 +53,14 @@
   <p id="summary-message">Your fitness and nutrition Summary</p>
 
   <div id="dashboard-data"></div>
+
+  <!-- Today's Workout Checklist Section -->
+  <div class="dashboard-section">
+    <h2>Today's Workout Plan 💪</h2>
+    <div id="today-workout-checklist">
+      <p>Loading today's workout...</p>
+    </div>
+  </div>
 
   <!-- Food Tracking Summary Section -->
   <div class="dashboard-section">
@@ -54,6 +99,7 @@
     const welcomeMessage = document.getElementById("welcome-message");
     const dashboardData = document.getElementById("dashboard-data");
     const foodSummaryDiv = document.getElementById("food-tracking-summary");
+    const workoutChecklistDiv = document.getElementById("today-workout-checklist");
 
     if (!user) {
       alert("Please sign in first!");
@@ -62,6 +108,9 @@
     }
 
     welcomeMessage.textContent = `Hello, ${user.username}!`;
+
+    // Load today's workout checklist
+    loadTodayWorkout();
 
     // Load food tracking data from localStorage
     loadFoodTrackingSummary();
@@ -107,6 +156,75 @@
       dashboardData.innerHTML = html;
     }
   });
+
+  // Function to load and display today's workout checklist
+  function loadTodayWorkout() {
+    const workoutChecklistDiv = document.getElementById("today-workout-checklist");
+    const dailyWorkouts = JSON.parse(localStorage.getItem('dailyWorkouts') || '{}');
+    const todayDate = new Date().toISOString().split('T')[0];
+    
+    const todayWorkout = dailyWorkouts[todayDate];
+
+    if (!todayWorkout || !todayWorkout.exercises || todayWorkout.exercises.length === 0) {
+      workoutChecklistDiv.innerHTML = `
+        <p style="color: #666;">No workout planned for today.</p>
+        <a href="Workout_Generator.html" class="dashboard-link">Create Workout Plan</a>
+      `;
+      return;
+    }
+
+    // Calculate completion percentage
+    const totalExercises = todayWorkout.exercises.length;
+    const completedExercises = todayWorkout.exercises.filter(ex => ex.completed).length;
+    const completionPercent = Math.round((completedExercises / totalExercises) * 100);
+
+    let html = `
+      <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+        <p style="margin: 0;"><strong>Progress:</strong> ${completedExercises} / ${totalExercises} exercises completed (${completionPercent}%)</p>
+      </div>
+      <div class="workout-checklist">
+    `;
+
+    todayWorkout.exercises.forEach((exercise, index) => {
+      const metaInfo = [];
+      if (exercise.sets) metaInfo.push(`${exercise.sets} sets`);
+      if (exercise.reps) metaInfo.push(`${exercise.reps} reps`);
+      if (exercise.duration) metaInfo.push(exercise.duration);
+      const metaStr = metaInfo.length > 0 ? metaInfo.join(' × ') : '';
+
+      html += `
+        <div class="workout-item ${exercise.completed ? 'completed' : ''}">
+          <input 
+            type="checkbox" 
+            id="exercise-${index}" 
+            ${exercise.completed ? 'checked' : ''}
+            onchange="toggleExercise(${index})"
+          />
+          <div class="workout-details">
+            <div class="workout-name">${exercise.name}</div>
+            <div class="workout-meta">${metaStr}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+    workoutChecklistDiv.innerHTML = html;
+  }
+
+  // Function to toggle exercise completion
+  window.toggleExercise = function(index) {
+    const dailyWorkouts = JSON.parse(localStorage.getItem('dailyWorkouts') || '{}');
+    const todayDate = new Date().toISOString().split('T')[0];
+    
+    if (dailyWorkouts[todayDate] && dailyWorkouts[todayDate].exercises[index]) {
+      dailyWorkouts[todayDate].exercises[index].completed = 
+        !dailyWorkouts[todayDate].exercises[index].completed;
+      
+      localStorage.setItem('dailyWorkouts', JSON.stringify(dailyWorkouts));
+      loadTodayWorkout(); // Refresh the display
+    }
+  };
 
   // Function to load and display food tracking summary
   function loadFoodTrackingSummary() {
