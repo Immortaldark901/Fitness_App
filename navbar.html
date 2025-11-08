@@ -15,6 +15,7 @@
 
     <!-- Home -->
     <a id="home-btn" href="home.html" class="dropbtn">Home</a>
+    <a id="dashboard-link" href="Dashboard.html" class="dropbtn" style="display:none;">Dashboard</a>
 
     <!-- Nutrition -->
     <div class="dropdown">
@@ -44,10 +45,53 @@
     <div class="dropdown right">
       <button class="dropbtn" id="account-btn">Account</button>
       <div class="dropdown-content" id="account-options">
-        <a href="signin.html">Sign In</a>
-        <a href="signup.html">Sign Up</a>
+        <a href="signin.html" id="signinOption">Sign In</a>
+        <a href="signup.html" id="signupOption">Sign Up</a>
       </div>
     </div>
   </div>
+  <script>
+    // Dynamically update navbar based on login status
+    function updateNavbarForLogin() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const dashboardLink = document.getElementById('dashboard-link');
+      const accountBtn = document.getElementById('account-btn');
+      const accountOptions = document.getElementById('account-options');
+      
+      if (user) {
+        // Show Dashboard link
+        if (dashboardLink) dashboardLink.style.display = '';
+        // Change dropdown
+        accountBtn.textContent = user.username || 'Profile';
+        accountOptions.innerHTML = `
+          <a href="profile.html">Profile</a>
+          <a href="#" id="logoutOption">Log Out</a>
+        `;
+        // Logout handler
+        setTimeout(() => {
+          const logoutOption = document.getElementById('logoutOption');
+          if (logoutOption) {
+            logoutOption.onclick = function(e) {
+              e.preventDefault();
+              localStorage.removeItem('user');
+              window.location.href = "home.html";
+            };
+          }
+        }, 50);
+      } else {
+        // Hide Dashboard link
+        if (dashboardLink) dashboardLink.style.display = 'none';
+        // Change dropdown to Sign In/Sign Up
+        accountBtn.textContent = 'Account';
+        accountOptions.innerHTML = `
+          <a href="signin.html" id="signinOption">Sign In</a>
+          <a href="signup.html" id="signupOption">Sign Up</a>
+        `;
+      }
+    }
+    document.addEventListener("DOMContentLoaded", updateNavbarForLogin);
+    // Also support dynamic inclusion
+    setTimeout(updateNavbarForLogin, 100);
+  </script>
 </body>
 </html>
