@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Workout Generator - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
   <!-- Navbar placeholder -->
@@ -53,186 +52,203 @@
     </section>
   </main>
 
+  <!-- Navbar Loader -->
+  <script src="script.js"></script>
 
-  // ---------------- Navbar loader--------------------------------//
-   <script src="script.js"></script>
-  // ---------------- Workout generator logic ----------------//
-  <script>
+  <!-- Workout Generator Logic -->
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
 
-  const workoutData = {
-    strength: ["Push-ups","Pull-ups","Squats","Bench Press","Deadlifts","Overhead Press","Bicep Curls","Tricep Dips"],
-    cardio: ["Running","Cycling","Jump Rope","Burpees","Mountain Climbers","High Knees","Treadmill Sprint","Stair Climb"],
-    core: ["Plank","Russian Twists","Crunches","Leg Raises","Bicycle Crunches","Side Plank","Hanging Knee Raises","Flutter Kicks"],
-    legs: ["Lunges","Squats","Leg Press","Step Ups","Calf Raises","Wall Sit","Glute Bridge","Bulgarian Split Squat"],
-    arms: ["Bicep Curls","Tricep Dips","Hammer Curls","Push-ups","Tricep Kickbacks","Diamond Push-ups","Chin-ups","Overhead Tricep Extension"],
-    flexibility: ["Forward Fold","Butterfly Stretch","Cat-Cow Pose","Child’s Pose","Seated Twist","Cobra Stretch","Shoulder Rolls","Hamstring Stretch"],
-    fullbody: ["Burpees","Jumping Jacks","Plank to Push-up","Mountain Climbers","Kettlebell Swing","Squat to Press","Bear Crawl","Skipping Rope"]
-  };
-
-  // plan stored as array of objects: { name, sets, reps, duration, type }
-  let userPlan = JSON.parse(localStorage.getItem('nutri_userPlan') || '[]');
-
-  const workoutListEl = document.getElementById('workout-list');
-  const planEl = document.getElementById('user-plan');
-  const showBtn = document.getElementById('showBtn');
-  const workoutTypeSel = document.getElementById('workoutType');
-  const savePlanBtn = document.getElementById('savePlan');
-  const exportBtn = document.getElementById('exportPlan');
-  const clearSavedBtn = document.getElementById('clearSaved');
-  const exportArea = document.getElementById('exportArea');
-
-  // render "Show Workouts" button click
-  showBtn.addEventListener('click', () => {
-    const type = workoutTypeSel.value;
-    renderWorkoutOptions(type);
-  });
-
-  // add exercise card list
-  function renderWorkoutOptions(type) {
-    if (!type || !workoutData[type]) {
-      workoutListEl.innerHTML = `<p class="muted">Please select a workout type.</p>`;
-      return;
-    }
-
-    const exercises = workoutData[type];
-    const html = exercises.map(ex => `
-      <div class="workout-card" data-ex="${escapeHtml(ex)}">
-        <div class="wc-left">
-          <p class="ex-name">${escapeHtml(ex)}</p>
-          <small class="ex-type">${escapeHtml(type)}</small>
-        </div>
-        <div class="wc-right">
-          <button class="add-btn" data-ex="${escapeHtml(ex)}"> + Add</button>
-        </div>
-      </div>
-    `).join('');
-
-    workoutListEl.innerHTML = `<div class="workout-cards">${html}</div>`;
-    // delegate add clicks
-    workoutListEl.querySelectorAll('.add-btn').forEach(btn => {
-      btn.addEventListener('click', () => addToPlan(btn.dataset.ex, type));
-    });
-  }
-
-  // add exercise to plan with optional prompt for sets/reps/duration
-  function addToPlan(name, type) {
-    // avoid duplicates
-    if (userPlan.some(item => item.name === name)) {
-      flashMessage(`${name} already in plan`);
-      return;
-    }
-
-    // quick modal-less input using prompt — lightweight and usable
-    let sets = prompt("Enter sets (leave blank for N/A):", "3");
-    if (sets === null) return; // cancelled
-    let reps = prompt("Enter reps per set (leave blank if not applicable):", "10");
-    if (reps === null) return;
-    let duration = prompt("Enter duration (e.g., 30s / 5min) or leave blank:", "");
-    if (duration === null) return;
-
-    const item = {
-      name,
-      type,
-      sets: sets.trim() || null,
-      reps: reps.trim() || null,
-      duration: duration.trim() || null
+    const workoutData = {
+      strength: ["Push-ups","Pull-ups","Squats","Bench Press","Deadlifts","Overhead Press","Bicep Curls","Tricep Dips"],
+      cardio: ["Running","Cycling","Jump Rope","Burpees","Mountain Climbers","High Knees","Treadmill Sprint","Stair Climb"],
+      core: ["Plank","Russian Twists","Crunches","Leg Raises","Bicycle Crunches","Side Plank","Hanging Knee Raises","Flutter Kicks"],
+      legs: ["Lunges","Squats","Leg Press","Step Ups","Calf Raises","Wall Sit","Glute Bridge","Bulgarian Split Squat"],
+      arms: ["Bicep Curls","Tricep Dips","Hammer Curls","Push-ups","Tricep Kickbacks","Diamond Push-ups","Chin-ups","Overhead Tricep Extension"],
+      flexibility: ["Forward Fold","Butterfly Stretch","Cat-Cow Pose","Child’s Pose","Seated Twist","Cobra Stretch","Shoulder Rolls","Hamstring Stretch"],
+      fullbody: ["Burpees","Jumping Jacks","Plank to Push-up","Mountain Climbers","Kettlebell Swing","Squat to Press","Bear Crawl","Skipping Rope"]
     };
 
-    userPlan.push(item);
-    updatePlan();
-    savePlanToStorage();
-    flashMessage(`${name} added`);
-  }
+    let userPlan = JSON.parse(localStorage.getItem('nutri_userPlan') || '[]');
 
-  function removeFromPlan(index) {
-    userPlan.splice(index,1);
-    updatePlan();
-    savePlanToStorage();
-  }
+    const workoutListEl = document.getElementById('workout-list');
+    const planEl = document.getElementById('user-plan');
+    const showBtn = document.getElementById('showBtn');
+    const workoutTypeSel = document.getElementById('workoutType');
+    const savePlanBtn = document.getElementById('savePlan');
+    const exportBtn = document.getElementById('exportPlan');
+    const clearSavedBtn = document.getElementById('clearSaved');
+    const exportArea = document.getElementById('exportArea');
 
-  function updatePlan() {
-    if (!userPlan.length) {
-      planEl.innerHTML = `<p class="muted">No workouts added yet.</p>`;
-      return;
+    // Load user session
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert("Please sign in first!");
+      window.location.href = "signin.html";
     }
 
-    const html = `
-      <ul class="plan-list">
-        ${userPlan.map((it, i) => `
-          <li>
-            <div class="plan-left">
-              <strong>${escapeHtml(it.name)}</strong>
-              <div class="meta">
-                ${it.sets ? `<span>Sets: ${escapeHtml(it.sets)}</span>` : ''}
-                ${it.reps ? `<span>Reps: ${escapeHtml(it.reps)}</span>` : ''}
-                ${it.duration ? `<span>Duration: ${escapeHtml(it.duration)}</span>` : ''}
-              </div>
-            </div>
-            <div class="plan-right">
-              <button class="remove-small" data-index="${i}">❌</button>
-            </div>
-          </li>
-        `).join('')}
-      </ul>
-    `;
-    planEl.innerHTML = html;
-    // wire remove buttons
-    planEl.querySelectorAll('.remove-small').forEach(btn => {
-      btn.addEventListener('click', () => removeFromPlan(Number(btn.dataset.index)));
+    // Show workouts based on selected type
+    showBtn.addEventListener('click', () => {
+      const type = workoutTypeSel.value;
+      renderWorkoutOptions(type);
     });
-  }
 
-  function savePlanToStorage() {
-    localStorage.setItem('nutri_userPlan', JSON.stringify(userPlan));
-  }
+    function renderWorkoutOptions(type) {
+      if (!type || !workoutData[type]) {
+        workoutListEl.innerHTML = `<p class="muted">Please select a workout type.</p>`;
+        return;
+      }
 
-  function loadPlanFromStorage() {
-    userPlan = JSON.parse(localStorage.getItem('nutri_userPlan') || '[]') || [];
-    updatePlan();
-  }
+      const exercises = workoutData[type];
+      const html = exercises.map(ex => `
+        <div class="workout-card" data-ex="${escapeHtml(ex)}">
+          <div class="wc-left">
+            <p class="ex-name">${escapeHtml(ex)}</p>
+            <small class="ex-type">${escapeHtml(type)}</small>
+          </div>
+          <div class="wc-right">
+            <button class="add-btn" data-ex="${escapeHtml(ex)}"> + Add</button>
+          </div>
+        </div>
+      `).join('');
 
-  savePlanBtn.addEventListener('click', () => {
-    savePlanToStorage();
-    flashMessage('Plan saved locally');
-  });
-
-  clearSavedBtn.addEventListener('click', () => {
-    if (!confirm('Clear saved plan from local device?')) return;
-    userPlan = [];
-    savePlanToStorage();
-    updatePlan();
-    flashMessage('Saved plan cleared');
-  });
-
-  exportBtn.addEventListener('click', () => {
-    if (!userPlan.length) {
-      flashMessage('Plan is empty');
-      return;
+      workoutListEl.innerHTML = `<div class="workout-cards">${html}</div>`;
+      workoutListEl.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', () => addToPlan(btn.dataset.ex, type));
+      });
     }
-    exportArea.hidden = false;
-    exportArea.textContent = JSON.stringify(userPlan, null, 2);
-    exportArea.scrollIntoView({behavior:'smooth'});
-  });
 
-  // small UI helpers
-  function flashMessage(msg) {
-    // lightweight, ephemeral UI message
-    const el = document.createElement('div');
-    el.className = 'flash';
-    el.textContent = msg;
-    document.body.appendChild(el);
-    setTimeout(()=> el.classList.add('show'), 10);
-    setTimeout(()=> el.classList.remove('show'), 2100);
-    setTimeout(()=> el.remove(), 2400);
-  }
+    // Add exercises to plan
+    function addToPlan(name, type) {
+      if (userPlan.some(item => item.name === name)) {
+        flashMessage(`${name} already in plan`);
+        return;
+      }
 
-  // escape html to avoid injection
-  function escapeHtml(s='') {
-    return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
-  }
+      let sets = prompt("Enter sets (leave blank for N/A):", "3");
+      if (sets === null) return;
+      let reps = prompt("Enter reps per set (leave blank if not applicable):", "10");
+      if (reps === null) return;
+      let duration = prompt("Enter duration (e.g., 30s / 5min) or leave blank:", "");
+      if (duration === null) return;
 
-  // initial load
-  loadPlanFromStorage();
+      const item = { name, type, sets: sets.trim() || null, reps: reps.trim() || null, duration: duration.trim() || null };
+      userPlan.push(item);
+      updatePlan();
+      savePlanToStorage();
+      flashMessage(`${name} added`);
+    }
+
+    function removeFromPlan(index) {
+      userPlan.splice(index, 1);
+      updatePlan();
+      savePlanToStorage();
+    }
+
+    function updatePlan() {
+      if (!userPlan.length) {
+        planEl.innerHTML = `<p class="muted">No workouts added yet.</p>`;
+        return;
+      }
+
+      const html = `
+        <ul class="plan-list">
+          ${userPlan.map((it, i) => `
+            <li>
+              <div class="plan-left">
+                <strong>${escapeHtml(it.name)}</strong>
+                <div class="meta">
+                  ${it.sets ? `<span>Sets: ${escapeHtml(it.sets)}</span>` : ''}
+                  ${it.reps ? `<span>Reps: ${escapeHtml(it.reps)}</span>` : ''}
+                  ${it.duration ? `<span>Duration: ${escapeHtml(it.duration)}</span>` : ''}
+                </div>
+              </div>
+              <div class="plan-right">
+                <button class="remove-small" data-index="${i}">❌</button>
+              </div>
+            </li>
+          `).join('')}
+        </ul>`;
+      planEl.innerHTML = html;
+
+      planEl.querySelectorAll('.remove-small').forEach(btn => {
+        btn.addEventListener('click', () => removeFromPlan(Number(btn.dataset.index)));
+      });
+    }
+
+    function savePlanToStorage() {
+      localStorage.setItem('nutri_userPlan', JSON.stringify(userPlan));
+    }
+
+    function loadPlanFromStorage() {
+      userPlan = JSON.parse(localStorage.getItem('nutri_userPlan') || '[]') || [];
+      updatePlan();
+    }
+
+    clearSavedBtn.addEventListener('click', () => {
+      if (!confirm('Clear saved plan from local device?')) return;
+      userPlan = [];
+      savePlanToStorage();
+      updatePlan();
+      flashMessage('Saved plan cleared');
+    });
+
+    exportBtn.addEventListener('click', () => {
+      if (!userPlan.length) {
+        flashMessage('Plan is empty');
+        return;
+      }
+      exportArea.hidden = false;
+      exportArea.textContent = JSON.stringify(userPlan, null, 2);
+      exportArea.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    function flashMessage(msg) {
+      const el = document.createElement('div');
+      el.className = 'flash';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.classList.add('show'), 10);
+      setTimeout(() => el.classList.remove('show'), 2100);
+      setTimeout(() => el.remove(), 2400);
+    }
+
+    function escapeHtml(s = '') {
+      return (s + '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // Load any existing plan
+    loadPlanFromStorage();
+
+    // Save workout plan to Supabase
+    savePlanBtn.addEventListener('click', async () => {
+      const planName = prompt("Enter a name for your workout plan:", "My Workout Plan");
+      if (!planName) return alert("Please enter a plan name.");
+
+      const plan = JSON.parse(localStorage.getItem('nutri_userPlan') || '[]');
+      if (plan.length === 0) {
+        alert("Please add exercises to your plan first!");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('workouts')
+        .insert([{
+          user_id: user.id,
+          plan_name: planName,
+          exercises: JSON.stringify(plan),
+          created_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.error('Error saving workout:', error);
+        alert('Failed to save your workout plan.');
+      } else {
+        alert('Workout plan saved successfully!');
+        localStorage.removeItem('nutri_userPlan');
+        window.location.href = 'Dashboard.html';
+      }
+    });
   </script>
 </body>
 </html>

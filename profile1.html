@@ -98,74 +98,64 @@
   </div>
 
   <script src="script.js"></script>
-  <script>
-    // Initialization
-    window.onload = function() {
-      const user = JSON.parse(localStorage.getItem('user'));
-      let profile = JSON.parse(localStorage.getItem('profile'));
-      if (!user) {
-        alert("Please sign up first!");
-        window.location.href = "signup.html";
-        return;
-      }
-      // Fill input fields
-      document.getElementById('username').value = user.username;
-      document.getElementById('email').value = user.email;
-      if (profile && profile.age && profile.height && profile.weight && profile.gender && profile.activity) {
-        // Hide profile form, show pane button
-        document.getElementById('profileInputCard').style.display = 'none';
-        document.getElementById('openPaneBtn').style.display = 'block';
-        setPane(user, profile);
-      } else {
-        document.getElementById('profileInputCard').style.display = 'block';
-        document.getElementById('openPaneBtn').style.display = 'none';
-        document.getElementById('profilePane').classList.remove('active');
-      }
+  <script type="module">
+  import { supabase } from './supabaseClient.js';
+
+  window.onload = async function () {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert("Please sign up first!");
+      window.location.href = "signup.html";
+      return;
+    }
+
+    document.getElementById('username').value = user.username;
+    document.getElementById('email').value = user.email;
+  };
+
+  // Save profile to Supabase and redirect
+  async function updateProfile(event) {
+    event.preventDefault();
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
+    const height = document.getElementById('height').value;
+    const weight = document.getElementById('weight').value;
+    const activity = document.getElementById('activity').value;
+
+    const profileData = {
+      user_id: user.id,
+      age,
+      gender,
+      height,
+      weight,
+      activity,
+      created_at: new Date().toISOString()
     };
-    // Save/update profile
-    function updateProfile(event) {
-      event.preventDefault();
-      const profileData = {
-        age: document.getElementById('age').value,
-        gender: document.getElementById('gender').value,
-        height: document.getElementById('height').value,
-        weight: document.getElementById('weight').value,
-        activity: document.getElementById('activity').value
-      };
-      localStorage.setItem('profile', JSON.stringify(profileData));
-      alert("Profile updated successfully!");
-      // After saving, hide form and show pane
-      document.getElementById('profileInputCard').style.display = 'none';
-      document.getElementById('openPaneBtn').style.display = 'block';
-      setPane(JSON.parse(localStorage.getItem('user')), profileData);
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert(profileData, { onConflict: ['user_id'] });
+
+    if (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } else {
+      alert('Profile saved successfully!');
+      window.location.href = 'Dashboard.html';
     }
-    // Set info in the pane
-    function setPane(user, profile) {
-      document.getElementById('paneUsername').innerText = `Name: ${user.username}`;
-      document.getElementById('paneEmail').innerText = `Email: ${user.email}`;
-      document.getElementById('paneAge').innerText = profile.age;
-      document.getElementById('paneGender').innerText = profile.gender;
-      document.getElementById('paneHeight').innerText = profile.height;
-      document.getElementById('paneWeight').innerText = profile.weight;
-      document.getElementById('paneActivity').innerText = profile.activity;
+  }
+
+  window.updateProfile = updateProfile;
+
+  function logoutUser() {
+    if (confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user');
+      window.location.href = "home.html";
     }
-    // Open/close pane logic
-    document.getElementById('openPaneBtn').onclick = function () {
-      document.getElementById('profilePane').classList.add('active');
-    };
-    function closePane() {
-      document.getElementById('profilePane').classList.remove('active');
-    }
-    window.closePane = closePane;
-    // Logout and clear data
-    function logoutUser() {
-      if (confirm("Are you sure you want to log out?")) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('profile');
-        window.location.href = "signin.html";
-      }
-    }
-    window.logoutUser = logoutUser;
-  </script>
+  }
+  window.logoutUser = logoutUser;
+</script>
 </body>
 </html>

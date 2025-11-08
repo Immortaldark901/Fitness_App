@@ -10,10 +10,10 @@
   <div id="navbar-placeholder"></div>
 
   <div class="dashboard-container">
-    <h1 id="welcome-message">Loading...</h1>
-    <p class="intro-text">
-      Welcome to your NutriHealth Dashboard — your central hub for nutrition and fitness progress.
-    </p>
+  <h1 id="welcome-message">Hello, User!</h1>
+  <p id="summary-message">Your fitness and nutrition Summary</p>
+
+  <div id="dashboard-data"></div>
 
     <div class="dashboard-section">
       <h2>Nutrition</h2>
@@ -36,39 +36,93 @@
     <button class="logout-btn" onclick="logoutUser()">Log Out</button>
   </div>
 
-  <script type="module">
-    import { supabase } from './supabaseClient.js'; // using your pre-configured Supabase client
+<script type="module">
+  import { supabase } from './supabaseClient.js';
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+  document.addEventListener("DOMContentLoaded", async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const welcomeMessage = document.getElementById("welcome-message");
+    const dashboardData = document.getElementById("dashboard-data");
 
-      const welcomeMessage = document.getElementById("welcome-message");
-      if (!user) {
-        welcomeMessage.textContent = "Redirecting...";
-        alert("Please sign in first!");
-        window.location.href = "signin.html";
-        return;
-      }
-
-      // Fetch user profile from Supabase
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("username, first_name")
-        .eq("id", user.id)
-        .single();
-
-      let name = "User";
-      if (profile?.username) name = profile.username;
-      else if (user.user_metadata?.username) name = user.user_metadata.username;
-      else if (profile?.first_name) name = profile.first_name;
-
-      welcomeMessage.textContent = `Hello, ${name}! 👋`;
-    });
-
-    async function logoutUser() {
-      await supabase.auth.signOut();
+    if (!user) {
+      alert("Please sign in first!");
       window.location.href = "signin.html";
+      return;
     }
-  </script>
+
+    welcomeMessage.textContent = `Hello, ${user.username}!`;
+
+    // Load workouts and food data
+    const [workoutRes, foodRes] = await Promise.all([
+      supabase.from('workouts').select('*').eq('user_id', user.id),
+      supabase.from('food_tracking').select('*').eq('user_id', user.id)
+    ]);
+
+    const workouts = workoutRes.data || [];
+    const foodLogs = foodRes.data || [];
+
+    let html = '';
+
+    // Workout Section
+    if (!workouts.length) {
+      html += `
+        <div class="empty-state">
+          <h3>Create your first Workout Plan 💪</h3>
+          <button class="btn-primary" onclick="window.location.href='Workout_Generator.html'">Create Workout Plan</button>
+        </div>`;
+    } else {
+      html += `
+        <h3>Your Saved Workouts</h3>
+        <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <tr><th>Plan Name</th><th>Exercises</th><th>Created At</th></tr>`;
+      workouts.forEach(w => {
+        const exercises = JSON.parse(w.exercises || '[]')
+          .map(ex => `<li>${ex.name}</li>`).join('');
+        html += `
+          <tr>
+            <td>${w.plan_name}</td>
+            <td><ul>${exercises}</ul></td>
+            <td>${new Date(w.created_at).toLocaleString()}</td>
+          </tr>`;
+      });
+      html += `</table>`;
+    }
+
+    // Food Section
+    if (!foodLogs.length) {
+      html += `
+        <div class="empty-state">
+          <h3>Add your first Food Intake 🍱</h3>
+          <button class="btn-primary" onclick="window.location.href='Food_Tracking.html'">Track Food</button>
+        </div>`;
+    } else {
+      html += `
+        <h3>Your Food Logs</h3>
+        <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <tr><th>Date</th><th>Goal (kcal)</th><th>Consumed (kcal)</th><th>Foods</th></tr>`;
+      foodLogs.forEach(f => {
+        const foods = JSON.parse(f.foods || '[]')
+          .map(item => `<li>${item.name} (${item.calories} kcal)</li>`).join('');
+        html += `
+          <tr>
+            <td>${f.date}</td>
+            <td>${f.goal}</td>
+            <td>${f.consumed}</td>
+            <td><ul>${foods}</ul></td>
+          </tr>`;
+      });
+      html += `</table>`;
+    }
+
+    dashboardData.innerHTML = html;
+  });
+
+  async function logoutUser() {
+    localStorage.removeItem('user');
+    window.location.href = "signin.html";
+  }
+  window.logoutUser = logoutUser;
+</script>
+
 </body>
 </html>

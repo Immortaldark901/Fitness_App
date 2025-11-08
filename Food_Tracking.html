@@ -2,25 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard - Nutri Health</title>
+  <title>Food Tracking - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
-<!-- Navbar -->
-<div id="navbar-placeholder"></div>
-
-<!-- Local Chart.js file -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- Navbar -->
   <div id="navbar-placeholder"></div>
 
   <div class="dashboard-container">
-    <h1>Welcome to Your Health Dashboard 🍱</h1>
+    <h1>Track Your Food Intake 🍱</h1>
 
     <!-- Calorie Goal Section -->
     <div class="calorie-section">
       <h2>Set Daily Calorie Goal</h2>
       <input type="number" id="calorie-goal" placeholder="Enter total calorie goal (kcal)">
-      <button onclick="setGoal()">Save Goal</button>
+      <button id="setGoalBtn">Save Goal</button>
     </div>
 
     <!-- Food Selection Section -->
@@ -38,8 +35,8 @@
       </div>
 
       <div class="button-row">
-        <button onclick="addFood()">Add to Today’s Intake</button>
-        <button class="reset-btn" onclick="resetData()">Reset All</button>
+        <button id="addFoodBtn">Add to Today’s Intake</button>
+        <button class="reset-btn" id="resetBtn">Reset All</button>
       </div>
     </div>
 
@@ -58,9 +55,19 @@
         <canvas id="nutrientChart"></canvas>
       </div>
     </div>
+
+    <button id="saveFoodBtn" class="primary" style="margin-top: 25px;">Save Food Log</button>
   </div>
 
-  <script>
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert("Please sign in first!");
+      window.location.href = "signin.html";
+    }
+
     // ----------------------------- Indian Food Data -----------------------------
     const indianFoods = {
       biryani: { calories: 400, carbs: 50, proteins: 15, fats: 18 },
@@ -78,33 +85,31 @@
     let goal = 0;
     let consumed = 0;
     let nutrients = { carbs: 0, proteins: 0, fats: 0 };
+    let foodsList = [];
     let chart;
 
-    // ----------------------------- Sort Dropdown Alphabetically -----------------------------
+    // ----------------------------- On Load -----------------------------
     window.onload = () => {
       const select = document.getElementById("food-select");
-      const sortedFoods = Object.keys(indianFoods).sort((a, b) =>
-        a.localeCompare(b)
-      );
-
+      const sortedFoods = Object.keys(indianFoods).sort((a, b) => a.localeCompare(b));
       sortedFoods.forEach(foodKey => {
         const option = document.createElement("option");
-        const name = foodKey.charAt(0).toUpperCase() + foodKey.slice(1).replace(/([A-Z])/g, ' $1');
+        const name = foodKey.charAt(0).toUpperCase() + foodKey.slice(1);
         option.value = foodKey;
         option.textContent = name;
         select.appendChild(option);
       });
     };
 
-    // ----------------------------- Functions -----------------------------
-    function setGoal() {
+    // ----------------------------- Handlers -----------------------------
+    document.getElementById('setGoalBtn').addEventListener('click', () => {
       goal = parseInt(document.getElementById('calorie-goal').value) || 0;
       document.getElementById('goal-display').textContent = goal;
       updateSummary();
       updateChart();
-    }
+    });
 
-    function autoFillNutrition() {
+    window.autoFillNutrition = () => {
       const selected = document.getElementById('food-select').value;
       if (!selected) return;
       const food = indianFoods[selected];
@@ -112,41 +117,62 @@
       document.getElementById('food-carbs').value = food.carbs;
       document.getElementById('food-proteins').value = food.proteins;
       document.getElementById('food-fats').value = food.fats;
-    }
+    };
 
-    function addFood() {
+    document.getElementById('addFoodBtn').addEventListener('click', () => {
+      const foodName = document.getElementById('food-select').value;
       const calories = parseInt(document.getElementById('food-calories').value);
       const carbs = parseInt(document.getElementById('food-carbs').value);
       const protein = parseInt(document.getElementById('food-proteins').value);
       const fat = parseInt(document.getElementById('food-fats').value);
-      if (!calories) return alert("Please select a food first!");
+
+      if (!foodName || !calories) return alert("Please select a food first!");
 
       consumed += calories;
       nutrients.carbs += carbs;
       nutrients.proteins += protein;
       nutrients.fats += fat;
+      foodsList.push({ name: foodName, calories, carbs, protein, fat });
 
       updateSummary();
       updateChart();
 
-      document.getElementById('food-select').value = "";
       document.querySelectorAll(".nutrition-inputs input").forEach(i => i.value = "");
-    }
+      document.getElementById('food-select').value = "";
+    });
 
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!confirm("Are you sure you want to reset all entries?")) return;
+
+      goal = 0;
+      consumed = 0;
+      nutrients = { carbs: 0, proteins: 0, fats: 0 };
+      foodsList = [];
+
+      document.querySelectorAll("input").forEach(i => (i.value = ""));
+      document.getElementById('goal-display').textContent = 0;
+      document.getElementById('consumed-display').textContent = 0;
+      document.getElementById('remaining-display').textContent = 0;
+
+      if (chart) chart.destroy();
+    });
+
+    // ----------------------------- Summary & Chart -----------------------------
     function updateSummary() {
-      const remainingElem = document.getElementById('remaining-display');
+      document.getElementById('goal-display').textContent = goal;
       document.getElementById('consumed-display').textContent = consumed;
-
+      const remainingElem = document.getElementById('remaining-display');
       const remaining = goal - consumed;
+
       if (remaining > 0) {
         remainingElem.textContent = `${remaining} kcal remaining`;
-        remainingElem.style.color = "#008000"; // green
+        remainingElem.style.color = "green";
       } else if (remaining === 0) {
         remainingElem.textContent = "Goal reached 🎯";
-        remainingElem.style.color = "#0066cc";
+        remainingElem.style.color = "blue";
       } else {
-        remainingElem.textContent = `Exceeded by ${Math.abs(remaining)} kcal `;
-        remainingElem.style.color = "#ff0000"; // red
+        remainingElem.textContent = `Exceeded by ${Math.abs(remaining)} kcal`;
+        remainingElem.style.color = "red";
       }
     }
 
@@ -172,7 +198,7 @@
       ];
 
       const colors = ['#FFB347', '#1E90FF', '#FF4C4C', '#2E2E2E'];
-      if (exceeded > 0) colors.push('#B22222'); // dark red for over limit
+      if (exceeded > 0) colors.push('#B22222');
 
       if (chart) chart.destroy();
       chart = new Chart(ctx, {
@@ -189,42 +215,40 @@
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: '#EAEAEA',
-                font: { size: 14 }
-              }
-            }
+            legend: { position: 'bottom' }
           }
         }
       });
-
-      ctx.parentElement.style.backgroundColor = "#121212";
-      ctx.parentElement.style.borderRadius = "12px";
-      ctx.parentElement.style.padding = "15px";
     }
 
-    // ----------------------------- Reset All Data -----------------------------
-    function resetData() {
-      if (!confirm("Are you sure you want to reset all entries?")) return;
+    // ----------------------------- Save to Supabase -----------------------------
+    document.getElementById('saveFoodBtn').addEventListener('click', async () => {
+      if (!goal || foodsList.length === 0) {
+        alert("Please set a goal and add some foods first!");
+        return;
+      }
 
-      goal = 0;
-      consumed = 0;
-      nutrients = { carbs: 0, proteins: 0, fats: 0 };
+      const { data, error } = await supabase.from('food_tracking').insert([
+        {
+          user_id: user.id,
+          date: new Date().toISOString().split('T')[0],
+          goal,
+          consumed,
+          foods: JSON.stringify(foodsList),
+          created_at: new Date().toISOString()
+        }
+      ]);
 
-      document.getElementById('goal-display').textContent = 0;
-      document.getElementById('consumed-display').textContent = 0;
-      document.getElementById('remaining-display').textContent = "0";
-      document.getElementById('calorie-goal').value = "";
-      document.getElementById('food-select').value = "";
-      document.querySelectorAll(".nutrition-inputs input").forEach(i => i.value = "");
-
-      if (chart) chart.destroy();
-    }
+      if (error) {
+        console.error('Error saving food log:', error);
+        alert("Failed to save your food log.");
+      } else {
+        alert("Food log saved successfully!");
+        window.location.href = "Dashboard.html";
+      }
+    });
   </script>
-  
-  <script src="script.js"></script>
 
+  <script src="script.js"></script>
 </body>
 </html>
