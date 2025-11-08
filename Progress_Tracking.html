@@ -5,6 +5,8 @@
   <title>Workout Progress - NutriHealth</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Auth Check Script -->
+  <script src="auth-check.js"></script>
 </head>
 <body>
   <!-- Navbar -->
@@ -151,7 +153,7 @@
       });
     }
 
-    // Auto-load today’s workouts on open
+    // Auto-load today's workouts on open
     window.addEventListener('load', async () => {
       const today = new Date().toISOString().split('T')[0];
       await loadWorkoutHistory(today);
